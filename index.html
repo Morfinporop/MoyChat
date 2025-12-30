@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sicore - Без блокировок и ограничений</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
         * {
             margin: 0;
@@ -14,402 +14,646 @@
         }
 
         :root {
-            --coffee-dark: #2D1B12;
-            --coffee-brown: #3E2723;
-            --coffee-medium: #5D4037;
-            --coffee-light: #8D6E63;
-            --cream: #EFEBE9;
-            --cream-dark: #D7CCC8;
-            --accent: #A1887F;
-            --online: #4CAF50;
-            --offline: #9E9E9E;
-            --red: #e74c3c;
-            --green: #2ecc71;
+            --coffee-dark: #1a1412;
+            --coffee-brown: #2a1f1a;
+            --coffee-medium: #3d2e26;
+            --coffee-light: #6b5449;
+            --cream: #f5f1ed;
+            --cream-dark: #d4cfc9;
+            --accent: #b8956a;
+            --online: #43b581;
+            --offline: #747f8d;
+            --danger: #ed4245;
+            --success: #43b581;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, var(--coffee-dark) 0%, var(--coffee-brown) 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--coffee-dark);
             color: var(--cream);
             overflow: hidden;
         }
 
-        /* AUTH SCREEN */
+        /* ==================== AUTH SCREEN ==================== */
         #authScreen {
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(141, 110, 99, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 50%, rgba(161, 136, 127, 0.1) 0%, transparent 50%),
-                linear-gradient(135deg, var(--coffee-dark) 0%, var(--coffee-brown) 100%);
-            position: relative;
-            overflow: auto;
+            background: linear-gradient(135deg, #1a1412 0%, #2a1f1a 100%);
+            padding: 20px;
         }
 
-        .watermark {
-            position: absolute;
-            right: 15%;
-            top: 50%;
-            transform: translateY(-50%) rotate(-15deg);
+        .auth-container {
+            background: rgba(45, 35, 30, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 48px 40px;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(184, 149, 106, 0.1);
+        }
+
+        .auth-header {
             text-align: center;
-            pointer-events: none;
-            opacity: 0.15;
+            margin-bottom: 32px;
         }
 
-        .watermark h1 {
-            font-size: 120px;
+        .auth-logo {
+            font-size: 48px;
+            margin-bottom: 8px;
+        }
+
+        .auth-title {
+            font-size: 28px;
             font-weight: 700;
             background: linear-gradient(135deg, var(--cream) 0%, var(--accent) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 20px;
+            margin-bottom: 8px;
         }
 
-        .watermark p {
-            font-size: 32px;
+        .auth-subtitle {
             color: var(--accent);
-            font-weight: 500;
-        }
-
-        .auth-container {
-            background: rgba(62, 39, 35, 0.95);
-            backdrop-filter: blur(20px);
-            padding: 50px;
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(161, 136, 127, 0.2);
-            min-width: 450px;
-            max-width: 500px;
-            z-index: 10;
+            font-size: 14px;
         }
 
         .auth-tabs {
             display: flex;
-            gap: 12px;
-            margin-bottom: 30px;
+            gap: 8px;
+            margin-bottom: 24px;
+            background: var(--coffee-dark);
+            padding: 4px;
+            border-radius: 12px;
         }
 
         .auth-tab {
             flex: 1;
             padding: 12px;
-            background: rgba(45, 27, 18, 0.6);
-            border: 2px solid transparent;
-            border-radius: 12px;
-            color: var(--accent);
+            background: transparent;
+            border: none;
+            color: var(--cream-dark);
+            font-weight: 600;
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s;
-            text-align: center;
-            font-weight: 600;
         }
 
         .auth-tab.active {
             background: var(--coffee-medium);
-            border-color: var(--accent);
             color: var(--cream);
         }
 
-        .input-field {
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .form-group {
             margin-bottom: 20px;
         }
 
-        .input-field label {
+        .form-label {
             display: block;
-            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 600;
             color: var(--cream-dark);
-            font-size: 14px;
-            font-weight: 500;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .input-field input {
+        .form-input {
             width: 100%;
-            padding: 14px 18px;
-            background: rgba(45, 27, 18, 0.6);
-            border: 2px solid var(--coffee-medium);
-            border-radius: 12px;
+            padding: 14px 16px;
+            background: var(--coffee-dark);
+            border: 2px solid transparent;
+            border-radius: 10px;
             color: var(--cream);
             font-size: 15px;
             transition: all 0.3s;
         }
 
-        .input-field input:focus {
+        .form-input:focus {
             outline: none;
             border-color: var(--accent);
-            background: rgba(45, 27, 18, 0.8);
+            background: rgba(26, 20, 18, 0.8);
         }
 
-        .checkbox-field {
+        .form-checkbox {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin: 20px 0;
+            gap: 8px;
+            margin: 16px 0;
         }
 
-        .checkbox-field input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
+        .form-checkbox input {
+            width: 18px;
+            height: 18px;
             cursor: pointer;
         }
 
-        .checkbox-field label {
-            color: var(--cream-dark);
+        .form-checkbox label {
             font-size: 14px;
+            color: var(--cream-dark);
             cursor: pointer;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
         }
 
         .btn-primary {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, var(--coffee-medium) 0%, var(--coffee-light) 100%);
-            border: none;
-            border-radius: 12px;
-            color: var(--cream);
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--accent) 0%, #9d7d54 100%);
+            color: var(--coffee-dark);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(141, 110, 99, 0.4);
+            box-shadow: 0 8px 24px rgba(184, 149, 106, 0.4);
         }
 
-        .btn-google {
-            background: white;
-            color: #333;
+        .btn-oauth {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 12px;
+            padding: 12px;
+            background: var(--coffee-dark);
+            color: var(--cream);
+            margin-bottom: 12px;
         }
 
-        .btn-google:hover {
-            background: #f5f5f5;
+        .btn-oauth:hover {
+            background: var(--coffee-medium);
+        }
+
+        .btn-oauth img {
+            width: 20px;
+            height: 20px;
         }
 
         .divider {
-            text-align: center;
+            display: flex;
+            align-items: center;
             margin: 24px 0;
-            position: relative;
+            color: var(--cream-dark);
+            font-size: 13px;
         }
 
-        .divider::before {
+        .divider::before,
+        .divider::after {
             content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            width: 100%;
+            flex: 1;
             height: 1px;
             background: var(--coffee-medium);
         }
 
         .divider span {
-            background: rgba(62, 39, 35, 0.95);
             padding: 0 16px;
-            position: relative;
-            color: var(--accent);
-            font-size: 14px;
         }
 
-        /* MAIN APP */
+        /* ==================== MAIN APP ==================== */
         #app {
             display: none;
             height: 100vh;
-            grid-template-columns: 280px 1fr;
+            grid-template-columns: 72px 240px 1fr;
         }
 
-        /* SIDEBAR */
-        .sidebar {
-            background: var(--coffee-brown);
+        /* ==================== SERVERS SIDEBAR ==================== */
+        .servers-sidebar {
+            background: var(--coffee-dark);
             display: flex;
             flex-direction: column;
-            border-right: 1px solid rgba(161, 136, 127, 0.1);
-        }
-
-        .sidebar-header {
-            padding: 20px;
-            border-bottom: 1px solid rgba(161, 136, 127, 0.1);
-            display: flex;
-            justify-content: space-between;
             align-items: center;
+            padding: 12px 0;
+            gap: 8px;
+            overflow-y: auto;
+            border-right: 1px solid rgba(184, 149, 106, 0.05);
         }
 
-        .sidebar-header h2 {
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        .icon-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            background: rgba(161, 136, 127, 0.2);
-            border: none;
-            color: var(--cream);
-            cursor: pointer;
-            transition: all 0.3s;
+        .server-item {
+            width: 48px;
+            height: 48px;
+            background: var(--coffee-brown);
+            border-radius: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            font-size: 20px;
         }
 
-        .icon-btn:hover {
+        .server-item:hover {
+            border-radius: 16px;
             background: var(--accent);
         }
 
-        .sidebar-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
+        .server-item.active {
+            border-radius: 16px;
+            background: var(--accent);
         }
 
-        .sidebar-section {
+        .server-item.active::before {
+            content: '';
+            position: absolute;
+            left: -12px;
+            width: 4px;
+            height: 40px;
+            background: var(--cream);
+            border-radius: 0 4px 4px 0;
+        }
+
+        .servers-divider {
+            width: 32px;
+            height: 2px;
+            background: var(--coffee-medium);
+            border-radius: 1px;
+            margin: 4px 0;
+        }
+
+        .user-settings {
+            margin-top: auto;
+            width: 48px;
+            height: 48px;
+            background: var(--coffee-brown);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .user-settings:hover {
+            background: var(--accent);
+        }
+
+        /* ==================== NAVIGATION SIDEBAR ==================== */
+        .nav-sidebar {
+            background: var(--coffee-brown);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(184, 149, 106, 0.05);
+        }
+
+        .nav-header {
+            padding: 16px;
+            font-weight: 700;
+            font-size: 15px;
+            border-bottom: 1px solid rgba(184, 149, 106, 0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-header:hover {
+            background: rgba(184, 149, 106, 0.05);
+        }
+
+        .nav-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 8px;
+        }
+
+        .nav-section {
             margin-bottom: 24px;
         }
 
-        .section-title {
-            font-size: 12px;
+        .nav-title {
+            font-size: 11px;
             color: var(--accent);
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
-            margin-bottom: 12px;
+            letter-spacing: 0.5px;
             padding: 0 8px;
+            margin-bottom: 4px;
         }
 
-        .friend-item, .group-item {
-            padding: 12px;
-            margin: 4px 0;
-            border-radius: 10px;
+        .nav-item {
+            padding: 8px 12px;
+            margin: 2px 0;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
             align-items: center;
             gap: 12px;
+            color: var(--cream-dark);
         }
 
-        .friend-item:hover, .group-item:hover {
-            background: rgba(161, 136, 127, 0.2);
+        .nav-item:hover {
+            background: rgba(184, 149, 106, 0.1);
+            color: var(--cream);
         }
 
-        .friend-item.active, .group-item.active {
+        .nav-item.active {
             background: var(--coffee-medium);
+            color: var(--cream);
         }
 
-        .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 16px;
-            position: relative;
-            flex-shrink: 0;
+        .nav-item-icon {
+            width: 20px;
+            text-align: center;
         }
 
-        .avatar img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .status-dot {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            border: 2px solid var(--coffee-brown);
-        }
-
-        .status-dot.online { background: var(--online); }
-        .status-dot.offline { background: var(--offline); }
-
-        .friend-info {
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .friend-name {
-            font-weight: 500;
-            font-size: 15px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .friend-status {
-            font-size: 12px;
-            color: var(--accent);
-        }
-
-        .user-panel {
-            padding: 16px;
-            border-top: 1px solid rgba(161, 136, 127, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        /* CHAT AREA */
-        .chat-area {
+        /* ==================== MAIN CONTENT ==================== */
+        .main-content {
             display: flex;
             flex-direction: column;
             background: var(--coffee-dark);
         }
 
-        .chat-header {
-            padding: 16px 24px;
-            border-bottom: 1px solid rgba(161, 136, 127, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(62, 39, 35, 0.6);
+        /* ==================== FRIENDS VIEW ==================== */
+        .friends-view {
+            display: none;
+            flex-direction: column;
+            height: 100%;
         }
 
-        .chat-header-left {
+        .friends-view.active {
+            display: flex;
+        }
+
+        .friends-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(184, 149, 106, 0.1);
             display: flex;
             align-items: center;
             gap: 16px;
         }
 
-        .chat-header-right {
+        .friends-tabs {
             display: flex;
-            gap: 12px;
+            gap: 16px;
         }
 
-        .action-circle {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(161, 136, 127, 0.2);
+        .friends-tab {
+            padding: 8px 16px;
+            background: transparent;
             border: none;
+            color: var(--cream-dark);
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .friends-tab:hover {
+            background: var(--coffee-medium);
+            color: var(--cream);
+        }
+
+        .friends-tab.active {
+            background: var(--accent);
+            color: var(--coffee-dark);
+        }
+
+        .friends-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--cream-dark);
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            transform: rotate(-2deg);
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        .sicore-branding {
+            text-align: center;
+            margin: 48px 0;
+        }
+
+        .sicore-title {
+            font-size: 72px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--cream) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transform: rotate(-2deg);
+            margin-bottom: 16px;
+        }
+
+        .sicore-subtitle {
+            font-size: 18px;
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .friend-request-input {
+            display: flex;
+            gap: 12px;
+            padding: 24px;
+            background: var(--coffee-brown);
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .friend-request-input input {
+            flex: 1;
+            padding: 12px 16px;
+            background: var(--coffee-dark);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            color: var(--cream);
+        }
+
+        .friend-request-input input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .friend-request-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: var(--coffee-brown);
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .friend-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--accent);
             display: flex;
             align-items: center;
             justify-content: center;
+            font-weight: 700;
             font-size: 18px;
+            position: relative;
         }
 
-        .action-circle:hover {
+        .friend-info {
+            flex: 1;
+        }
+
+        .friend-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .friend-status {
+            font-size: 13px;
+            color: var(--accent);
+        }
+
+        .friend-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn.accept {
+            background: var(--success);
+            color: white;
+        }
+
+        .action-btn.decline {
+            background: var(--danger);
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .friends-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .friend-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 16px;
+            background: var(--coffee-brown);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .friend-item:hover {
+            background: var(--coffee-medium);
+        }
+
+        .status-dot {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 3px solid var(--coffee-brown);
+        }
+
+        .status-online {
+            background: var(--online);
+        }
+
+        .status-offline {
+            background: var(--offline);
+        }
+
+        /* ==================== DM VIEW ==================== */
+        .dm-view {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .dm-view.active {
+            display: flex;
+        }
+
+        .dm-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(184, 149, 106, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: var(--coffee-brown);
+        }
+
+        .dm-user-info {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .dm-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(184, 149, 106, 0.1);
+            border: none;
+            color: var(--cream);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-btn:hover {
             background: var(--accent);
-        }
-
-        .action-circle.green {
-            background: var(--green);
-        }
-
-        .action-circle.red {
-            background: var(--red);
+            color: var(--coffee-dark);
         }
 
         .messages-container {
@@ -421,42 +665,54 @@
             gap: 16px;
         }
 
-        .message-item {
+        .message {
             display: flex;
             gap: 12px;
-            padding: 12px;
-            border-radius: 10px;
+            padding: 4px 8px;
+            border-radius: 8px;
             transition: background 0.2s;
             position: relative;
         }
 
-        .message-item:hover {
-            background: rgba(161, 136, 127, 0.1);
+        .message:hover {
+            background: rgba(184, 149, 106, 0.05);
         }
 
-        .message-item:hover .message-actions {
+        .message:hover .message-options {
             display: flex;
         }
 
-        .message-content-wrap {
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .message-content {
             flex: 1;
         }
 
         .message-header {
             display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 6px;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 4px;
         }
 
         .message-author {
             font-weight: 600;
-            color: var(--cream);
+            font-size: 15px;
         }
 
         .message-time {
             font-size: 12px;
-            color: var(--accent);
+            color: var(--cream-dark);
         }
 
         .message-text {
@@ -464,57 +720,37 @@
             line-height: 1.5;
         }
 
-        .message-actions {
+        .message-options {
+            display: none;
             position: absolute;
-            top: -12px;
-            right: 12px;
+            top: -8px;
+            right: 16px;
             background: var(--coffee-brown);
             border-radius: 8px;
             padding: 4px;
-            display: none;
-            gap: 4px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
-        .message-action-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            background: transparent;
-            border: none;
-            color: var(--cream);
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .message-action-btn:hover {
-            background: var(--accent);
-        }
-
         .message-input-container {
-            padding: 20px 24px;
-            background: rgba(62, 39, 35, 0.6);
-            border-top: 1px solid rgba(161, 136, 127, 0.1);
+            padding: 24px;
+            background: var(--coffee-brown);
         }
 
-        .message-input-wrap {
+        .message-input-wrapper {
             display: flex;
             gap: 12px;
-            background: var(--coffee-brown);
+            background: var(--coffee-dark);
             border-radius: 12px;
-            padding: 12px 16px;
+            padding: 14px 16px;
             border: 2px solid transparent;
             transition: border 0.3s;
         }
 
-        .message-input-wrap:focus-within {
+        .message-input-wrapper:focus-within {
             border-color: var(--accent);
         }
 
-        .message-input-wrap input {
+        .message-input {
             flex: 1;
             background: none;
             border: none;
@@ -522,211 +758,168 @@
             font-size: 15px;
         }
 
-        .message-input-wrap input:focus {
+        .message-input:focus {
             outline: none;
         }
 
         .send-btn {
             background: var(--accent);
+            color: var(--coffee-dark);
             border: none;
-            padding: 10px 24px;
+            padding: 8px 20px;
             border-radius: 8px;
-            color: var(--cream);
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
         }
 
         .send-btn:hover {
-            background: var(--coffee-light);
+            transform: scale(1.05);
         }
 
-        /* FRIENDS VIEW */
-        #friendsView {
-            display: none;
-        }
-
-        .friends-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid rgba(161, 136, 127, 0.1);
-            background: rgba(62, 39, 35, 0.6);
-        }
-
-        .friends-tabs {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-
-        .friend-tab {
-            padding: 8px 16px;
-            background: transparent;
-            border: none;
-            color: var(--accent);
-            cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.3s;
-            font-weight: 500;
-        }
-
-        .friend-tab.active {
-            background: var(--accent);
-            color: var(--cream);
-        }
-
-        .add-friend-section {
-            background: rgba(45, 27, 18, 0.4);
-            padding: 16px;
-            border-radius: 12px;
-            display: flex;
-            gap: 12px;
-        }
-
-        .add-friend-section input {
-            flex: 1;
-            padding: 12px 16px;
-            background: var(--coffee-dark);
-            border: 2px solid var(--coffee-medium);
-            border-radius: 8px;
-            color: var(--cream);
-        }
-
-        .add-friend-section input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .friends-list {
-            padding: 24px;
-        }
-
-        .friend-request-item {
-            background: rgba(62, 39, 35, 0.6);
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .friend-request-info {
-            flex: 1;
-        }
-
-        .friend-request-name {
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .friend-request-login {
-            font-size: 14px;
-            color: var(--accent);
-        }
-
-        .friend-request-actions {
-            display: flex;
-            gap: 12px;
-        }
-
-        /* CALL SCREEN */
-        #callScreen {
+        /* ==================== CALL OVERLAY ==================== */
+        .call-overlay {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(45, 27, 18, 0.98);
-            z-index: 1000;
-            flex-direction: column;
+            right: 0;
+            bottom: 0;
+            background: rgba(26, 20, 18, 0.98);
+            z-index: 9999;
             align-items: center;
             justify-content: center;
         }
 
+        .call-overlay.active {
+            display: flex;
+        }
+
+        .call-container {
+            text-align: center;
+        }
+
         .call-avatar {
-            width: 160px;
-            height: 160px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
             background: var(--accent);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 64px;
-            margin-bottom: 24px;
-            position: relative;
+            font-size: 48px;
+            font-weight: 700;
+            margin: 0 auto 24px;
+            border: 4px solid transparent;
+            transition: border 0.3s;
         }
 
         .call-avatar.speaking {
-            box-shadow: 0 0 0 8px var(--coffee-light),
-                        0 0 0 16px var(--coffee-medium);
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                box-shadow: 0 0 0 0 var(--coffee-light),
-                           0 0 0 8px var(--coffee-medium);
-            }
-            50% {
-                box-shadow: 0 0 0 8px var(--coffee-light),
-                           0 0 0 16px var(--coffee-medium);
-            }
+            border-color: var(--accent);
+            box-shadow: 0 0 24px rgba(184, 149, 106, 0.5);
         }
 
         .call-name {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 600;
-            margin-bottom: 40px;
+            margin-bottom: 8px;
+        }
+
+        .call-status {
+            color: var(--accent);
+            margin-bottom: 32px;
         }
 
         .call-controls {
             display: flex;
-            gap: 24px;
+            gap: 16px;
+            justify-content: center;
         }
 
-        .call-control-btn {
-            width: 60px;
-            height: 60px;
+        .call-btn {
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
             border: none;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
             font-size: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .call-control-btn.camera {
+        .call-btn.camera {
             background: var(--coffee-medium);
             color: var(--cream);
         }
 
-        .call-control-btn.screen {
+        .call-btn.screen {
             background: var(--coffee-medium);
             color: var(--cream);
         }
 
-        .call-control-btn.hangup {
-            background: var(--red);
+        .call-btn.hangup {
+            background: var(--danger);
             color: white;
         }
 
-        .call-control-btn:hover {
+        .call-btn.answer {
+            background: var(--success);
+            color: white;
+        }
+
+        .call-btn:hover {
             transform: scale(1.1);
         }
 
-        /* MODAL */
+        .call-btn.active {
+            background: var(--accent);
+        }
+
+        /* ==================== PINNED MESSAGES ==================== */
+        .pinned-panel {
+            display: none;
+            position: absolute;
+            top: 60px;
+            right: 24px;
+            width: 320px;
+            max-height: 400px;
+            background: var(--coffee-brown);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            z-index: 100;
+        }
+
+        .pinned-panel.active {
+            display: block;
+        }
+
+        .pinned-header {
+            font-weight: 600;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(184, 149, 106, 0.1);
+        }
+
+        .pinned-message {
+            padding: 12px;
+            background: var(--coffee-dark);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        /* ==================== SETTINGS MODAL ==================== */
         .modal {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 2000;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 10000;
             align-items: center;
             justify-content: center;
         }
@@ -737,88 +930,91 @@
 
         .modal-content {
             background: var(--coffee-brown);
-            padding: 32px;
             border-radius: 16px;
-            min-width: 400px;
-            max-width: 600px;
-            max-height: 80vh;
+            width: 90%;
+            max-width: 900px;
+            height: 80vh;
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            overflow: hidden;
+        }
+
+        .modal-sidebar {
+            background: var(--coffee-dark);
+            padding: 60px 16px 24px;
             overflow-y: auto;
         }
 
-        .modal-header {
-            margin-bottom: 24px;
+        .modal-main {
+            padding: 60px 40px;
+            overflow-y: auto;
         }
 
-        .modal-header h3 {
-            font-size: 24px;
-            margin-bottom: 8px;
-        }
-
-        .modal-body {
-            margin-bottom: 24px;
-        }
-
-        .modal-footer {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-        }
-
-        .btn-secondary {
-            padding: 12px 24px;
-            background: var(--coffee-dark);
-            border: 2px solid var(--accent);
-            border-radius: 8px;
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--coffee-medium);
+            border: none;
             color: var(--cream);
             cursor: pointer;
-            transition: all 0.3s;
+            font-size: 20px;
         }
 
-        .btn-secondary:hover {
-            background: var(--accent);
+        .settings-section {
+            margin-bottom: 40px;
         }
 
-        /* RESPONSIVE */
+        .settings-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        /* ==================== RESPONSIVE ==================== */
         @media (max-width: 768px) {
             #app {
-                grid-template-columns: 1fr;
+                grid-template-columns: 100%;
             }
 
-            .sidebar {
+            .servers-sidebar {
+                display: none;
+            }
+
+            .nav-sidebar {
                 position: fixed;
-                left: -280px;
+                left: -240px;
                 top: 0;
-                height: 100vh;
-                z-index: 100;
+                bottom: 0;
+                z-index: 1000;
                 transition: left 0.3s;
-                width: 280px;
             }
 
-            .sidebar.open {
+            .nav-sidebar.mobile-open {
                 left: 0;
             }
 
             .auth-container {
-                min-width: 90%;
-                padding: 30px 20px;
+                padding: 32px 24px;
             }
 
-            .watermark {
-                font-size: 60px !important;
-                right: 50%;
-                transform: translateX(50%) translateY(-50%) rotate(-15deg);
+            .sicore-title {
+                font-size: 48px;
             }
 
-            .watermark h1 {
-                font-size: 60px;
+            .modal-content {
+                grid-template-columns: 100%;
             }
 
-            .watermark p {
-                font-size: 16px;
+            .modal-sidebar {
+                display: none;
             }
         }
 
-        /* SCROLLBAR */
+        /* ==================== SCROLLBAR ==================== */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -836,1137 +1032,618 @@
             background: var(--accent);
         }
 
-        .hidden {
-            display: none !important;
+        /* ==================== ANIMATIONS ==================== */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        /* PINNED MESSAGES */
-        .pinned-banner {
-            background: rgba(161, 136, 127, 0.2);
-            padding: 12px 24px;
-            border-bottom: 1px solid rgba(161, 136, 127, 0.1);
-            display: none;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .pinned-banner.active {
-            display: flex;
-        }
-
-        /* CREATE GROUP FORM */
-        .avatar-upload {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            margin: 0 auto 24px;
-            font-size: 48px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .avatar-upload input {
-            display: none;
-        }
-
-        .avatar-upload img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .radio-group {
-            display: flex;
-            gap: 16px;
-            margin: 16px 0;
-        }
-
-        .radio-option {
-            flex: 1;
-            padding: 16px;
-            background: rgba(45, 27, 18, 0.6);
-            border: 2px solid var(--coffee-medium);
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-        }
-
-        .radio-option input {
-            display: none;
-        }
-
-        .radio-option.selected {
-            border-color: var(--accent);
-            background: rgba(161, 136, 127, 0.2);
-        }
-
-        .error-message {
-            background: rgba(231, 76, 60, 0.2);
-            border: 1px solid var(--red);
-            color: var(--cream);
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            font-size: 14px;
-        }
-
-        .success-message {
-            background: rgba(46, 204, 113, 0.2);
-            border: 1px solid var(--green);
-            color: var(--cream);
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            font-size: 14px;
+        .message {
+            animation: fadeIn 0.3s ease;
         }
     </style>
 </head>
 <body>
-    <!-- AUTH SCREEN -->
+    <!-- ==================== AUTH SCREEN ==================== -->
     <div id="authScreen">
-        <div class="watermark">
-            <h1>Sicore</h1>
-            <p>Без блокировок и ограничений</p>
-        </div>
-
         <div class="auth-container">
-            <div class="auth-tabs">
-                <div class="auth-tab active" onclick="switchAuthTab('login')">Вход</div>
-                <div class="auth-tab" onclick="switchAuthTab('register')">Регистрация</div>
+            <div class="auth-header">
+                <div class="auth-logo">☕</div>
+                <h1 class="auth-title">Sicore</h1>
+                <p class="auth-subtitle">Без блокировок и ограничений</p>
             </div>
 
-            <div id="authError" class="error-message hidden"></div>
-            <div id="authSuccess" class="success-message hidden"></div>
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="showAuthForm('login')">Вход</button>
+                <button class="auth-tab" onclick="showAuthForm('register')">Регистрация</button>
+            </div>
 
             <!-- LOGIN FORM -->
-            <form id="loginForm" onsubmit="handleLogin(event)">
-                <div class="input-field">
-                    <label>Email</label>
-                    <input type="email" id="loginEmail" required>
+            <form id="loginForm" class="auth-form active" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label class="form-label">Email или Логин</label>
+                    <input type="text" class="form-input" placeholder="example@mail.com" required>
                 </div>
-
-                <div class="input-field">
-                    <label>Пароль</label>
-                    <input type="password" id="loginPassword" required>
+                <div class="form-group">
+                    <label class="form-label">Пароль</label>
+                    <input type="password" class="form-input" placeholder="••••••••" required>
                 </div>
-
-                <div class="checkbox-field">
+                <div class="form-checkbox">
                     <input type="checkbox" id="rememberMe">
                     <label for="rememberMe">Запомнить меня</label>
                 </div>
-
-                <button type="submit" class="btn-primary">Войти</button>
-
-                <div class="divider"><span>или</span></div>
-
-                <button type="button" class="btn-primary btn-google" onclick="loginWithGoogle()">
-                    <svg width="20" height="20" viewBox="0 0 20 20">
-                        <path fill="#4285F4" d="M19.6 10.23c0-.82-.1-1.42-.25-2.05H10v3.72h5.5c-.15.96-.74 2.31-2.04 3.22v2.45h3.16c1.89-1.73 2.98-4.3 2.98-7.34z"/>
-                        <path fill="#34A853" d="M13.46 15.13c-.83.59-1.96 1-3.46 1-2.64 0-4.88-1.74-5.68-4.15H1.07v2.52C2.72 17.75 6.09 20 10 20c2.7 0 4.96-.89 6.62-2.42l-3.16-2.45z"/>
-                        <path fill="#FBBC05" d="M3.99 10c0-.69.12-1.35.32-1.97V5.51H1.07A9.973 9.973 0 000 10c0 1.61.39 3.14 1.07 4.49l3.24-2.52c-.2-.62-.32-1.28-.32-1.97z"/>
-                        <path fill="#EA4335" d="M10 3.88c1.88 0 3.13.81 3.85 1.48l2.84-2.76C14.96.99 12.7 0 10 0 6.09 0 2.72 2.25 1.07 5.51l3.24 2.52C5.12 5.62 7.36 3.88 10 3.88z"/>
-                    </svg>
-                    Войти через Google
-                </button>
+                <button type="submit" class="btn btn-primary">Войти</button>
             </form>
 
             <!-- REGISTER FORM -->
-            <form id="registerForm" class="hidden" onsubmit="handleRegister(event)">
-                <div class="input-field">
-                    <label>Имя</label>
-                    <input type="text" id="registerName" required>
+            <form id="registerForm" class="auth-form" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label class="form-label">Имя</label>
+                    <input type="text" class="form-input" id="regName" placeholder="Ваше имя" required>
                 </div>
-
-                <div class="input-field">
-                    <label>Логин</label>
-                    <input type="text" id="registerLogin" required>
+                <div class="form-group">
+                    <label class="form-label">Логин</label>
+                    <input type="text" class="form-input" id="regUsername" placeholder="username" required>
                 </div>
-
-                <div class="input-field">
-                    <label>Email</label>
-                    <input type="email" id="registerEmail" required>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="regEmail" placeholder="example@mail.com" required>
                 </div>
-
-                <div class="input-field">
-                    <label>Пароль</label>
-                    <input type="password" id="registerPassword" required minlength="6">
+                <div class="form-group">
+                    <label class="form-label">Пароль</label>
+                    <input type="password" class="form-input" id="regPassword" placeholder="••••••••" required>
                 </div>
-
-                <div class="input-field">
-                    <label>Повторите пароль</label>
-                    <input type="password" id="registerPasswordConfirm" required minlength="6">
+                <div class="form-group">
+                    <label class="form-label">Повторите пароль</label>
+                    <input type="password" class="form-input" id="regPasswordConfirm" placeholder="••••••••" required>
                 </div>
-
-                <button type="submit" class="btn-primary">Зарегистрироваться</button>
-
-                <div class="divider"><span>или</span></div>
-
-                <button type="button" class="btn-primary btn-google" onclick="loginWithGoogle()">
-                    <svg width="20" height="20" viewBox="0 0 20 20">
-                        <path fill="#4285F4" d="M19.6 10.23c0-.82-.1-1.42-.25-2.05H10v3.72h5.5c-.15.96-.74 2.31-2.04 3.22v2.45h3.16c1.89-1.73 2.98-4.3 2.98-7.34z"/>
-                        <path fill="#34A853" d="M13.46 15.13c-.83.59-1.96 1-3.46 1-2.64 0-4.88-1.74-5.68-4.15H1.07v2.52C2.72 17.75 6.09 20 10 20c2.7 0 4.96-.89 6.62-2.42l-3.16-2.45z"/>
-                        <path fill="#FBBC05" d="M3.99 10c0-.69.12-1.35.32-1.97V5.51H1.07A9.973 9.973 0 000 10c0 1.61.39 3.14 1.07 4.49l3.24-2.52c-.2-.62-.32-1.28-.32-1.97z"/>
-                        <path fill="#EA4335" d="M10 3.88c1.88 0 3.13.81 3.85 1.48l2.84-2.76C14.96.99 12.7 0 10 0 6.09 0 2.72 2.25 1.07 5.51l3.24 2.52C5.12 5.62 7.36 3.88 10 3.88z"/>
-                    </svg>
-                    Регистрация через Google
-                </button>
+                <div class="form-checkbox">
+                    <input type="checkbox" id="rememberMeReg">
+                    <label for="rememberMeReg">Запомнить меня</label>
+                </div>
+                <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
             </form>
+
+            <div class="divider">
+                <span>ИЛИ</span>
+            </div>
+
+            <!-- OAUTH BUTTONS -->
+            <button class="btn btn-oauth" onclick="loginWithGoogle()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                Войти через Google
+            </button>
+            <button class="btn btn-oauth" onclick="loginWithGithub()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
+                </svg>
+                Войти через GitHub
+            </button>
+            <button class="btn btn-oauth" onclick="loginWithDiscord()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                </svg>
+                Войти через Discord
+            </button>
         </div>
     </div>
 
-    <!-- MAIN APP -->
+    <!-- ==================== MAIN APP ==================== -->
     <div id="app">
-        <!-- SIDEBAR -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h2 id="sidebarTitle">Друзья</h2>
-                <button class="icon-btn" onclick="showCreateGroupModal()">+</button>
-            </div>
+        <!-- SERVERS SIDEBAR -->
+        <div class="servers-sidebar">
+            <div class="server-item active" onclick="showFriends()">👥</div>
+            <div class="servers-divider"></div>
+            <div id="serversList"></div>
+            <div class="server-item" onclick="showCreateServerModal()">+</div>
+            <div class="user-settings" onclick="showSettings()">⚙️</div>
+        </div>
 
-            <div class="sidebar-content">
-                <!-- FRIENDS TAB -->
-                <div id="friendsTab">
-                    <div class="sidebar-section">
-                        <div class="section-title">Запросы в друзья (<span id="requestsCount">0</span>)</div>
-                        <div id="friendRequestsList"></div>
-                    </div>
-
-                    <div class="sidebar-section">
-                        <div class="section-title">Друзья (<span id="friendsCount">0</span>)</div>
-                        <div id="friendsList"></div>
-                    </div>
-                </div>
-
-                <!-- GROUPS TAB -->
-                <div id="groupsTab" class="hidden">
-                    <div class="sidebar-section">
-                        <div class="section-title">Мои группы</div>
-                        <div id="groupsList"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="user-panel">
-                <div class="avatar" id="userAvatar">
-                    <div class="status-dot online"></div>
-                </div>
-                <div class="friend-info" style="flex: 1;">
-                    <div class="friend-name" id="userName"></div>
-                    <div class="friend-status" id="userLogin"></div>
-                </div>
-                <button class="icon-btn" onclick="showSettings()">⚙️</button>
+        <!-- NAVIGATION SIDEBAR -->
+        <div class="nav-sidebar">
+            <div class="nav-header" id="navHeader">Друзья</div>
+            <div class="nav-content" id="navContent">
+                <!-- Dynamic content -->
             </div>
         </div>
 
         <!-- MAIN CONTENT -->
-        <div class="chat-area">
+        <div class="main-content">
             <!-- FRIENDS VIEW -->
-            <div id="friendsView">
+            <div class="friends-view active" id="friendsView">
                 <div class="friends-header">
                     <div class="friends-tabs">
-                        <button class="friend-tab active" onclick="switchFriendTab('all')">Все</button>
-                        <button class="friend-tab" onclick="switchFriendTab('online')">Онлайн</button>
-                        <button class="friend-tab" onclick="switchFriendTab('offline')">Офлайн</button>
-                        <button class="friend-tab" onclick="switchFriendTab('add')">Добавить в друзья</button>
-                    </div>
-
-                    <div id="addFriendSection" class="add-friend-section hidden">
-                        <input type="text" id="addFriendInput" placeholder="Введите логин пользователя">
-                        <button class="btn-primary" style="width: auto; margin: 0;" onclick="sendFriendRequest()">Добавить</button>
+                        <button class="friends-tab active" onclick="switchFriendsTab('online')">Онлайн</button>
+                        <button class="friends-tab" onclick="switchFriendsTab('all')">Все</button>
+                        <button class="friends-tab" onclick="switchFriendsTab('pending')">Ожидание</button>
+                        <button class="friends-tab" onclick="switchFriendsTab('add')">Добавить</button>
                     </div>
                 </div>
-
-                <div class="friends-list" id="friendsViewList"></div>
+                <div class="friends-content" id="friendsContent">
+                    <div class="sicore-branding">
+                        <h1 class="sicore-title">Sicore</h1>
+                        <p class="sicore-subtitle">Без блокировок и ограничений</p>
+                    </div>
+                    <div class="empty-state">
+                        <div class="empty-state-icon">👥</div>
+                        <h3>Здесь пока пусто</h3>
+                        <p>Добавьте друзей, чтобы начать общение</p>
+                    </div>
+                </div>
             </div>
 
-            <!-- DM CHAT VIEW -->
-            <div id="dmChatView" class="hidden">
-                <div class="chat-header">
-                    <div class="chat-header-left">
-                        <div class="avatar" id="dmUserAvatar">
-                            <div class="status-dot"></div>
+            <!-- DM VIEW -->
+            <div class="dm-view" id="dmView">
+                <div class="dm-header">
+                    <div class="dm-user-info">
+                        <div class="friend-avatar">
+                            <span id="dmUserAvatar">U</span>
+                            <div class="status-dot status-online"></div>
                         </div>
                         <div>
-                            <div class="friend-name" id="dmUserName"></div>
-                            <div class="friend-status" id="dmUserStatus"></div>
+                            <div class="friend-name" id="dmUserName">Username</div>
+                            <div class="friend-status">онлайн</div>
                         </div>
                     </div>
-
-                    <div class="chat-header-right">
-                        <button class="action-circle" onclick="startCall('audio')" title="Позвонить">📞</button>
-                        <button class="action-circle" onclick="startCall('video')" title="Видеозвонок">📹</button>
-                        <button class="action-circle" onclick="togglePinnedMessages()" title="Закрепленные">📌</button>
+                    <div class="dm-actions">
+                        <button class="icon-btn" onclick="startCall('voice')" title="Голосовой звонок">📞</button>
+                        <button class="icon-btn" onclick="startCall('video')" title="Видео звонок">📹</button>
+                        <button class="icon-btn" onclick="togglePinned()" title="Закрепленные">📌</button>
                     </div>
                 </div>
-
-                <div class="pinned-banner" id="pinnedBanner">
-                    <span>📌</span>
-                    <span id="pinnedText">Закрепленные сообщения</span>
-                </div>
-
-                <div class="messages-container" id="dmMessages"></div>
-
+                <div class="messages-container" id="messagesContainer"></div>
                 <div class="message-input-container">
-                    <form class="message-input-wrap" id="dmMessageForm" onsubmit="sendDM(event)">
-                        <input type="text" id="dmMessageInput" placeholder="Напишите сообщение..." autocomplete="off">
+                    <form class="message-input-wrapper" onsubmit="sendMessage(event)">
+                        <input type="text" class="message-input" id="messageInput" placeholder="Напишите сообщение...">
                         <button type="submit" class="send-btn">Отправить</button>
                     </form>
                 </div>
-            </div>
 
-            <!-- GROUP CHAT VIEW -->
-            <div id="groupChatView" class="hidden">
-                <div class="chat-header">
-                    <div class="chat-header-left">
-                        <div class="avatar" id="groupAvatar"></div>
-                        <div>
-                            <div class="friend-name" id="groupName"></div>
-                            <div class="friend-status" id="groupMembersCount"></div>
+                <!-- PINNED MESSAGES PANEL -->
+                <div class="pinned-panel" id="pinnedPanel">
+                    <div class="pinned-header">📌 Закрепленные сообщения</div>
+                    <div id="pinnedMessages">
+                        <div class="empty-state">
+                            <p>Нет закрепленных сообщений</p>
                         </div>
                     </div>
-
-                    <div class="chat-header-right">
-                        <button class="action-circle" onclick="showGroupSettings()" title="Настройки группы">⚙️</button>
-                    </div>
-                </div>
-
-                <div class="messages-container" id="groupMessages"></div>
-
-                <div class="message-input-container">
-                    <form class="message-input-wrap" id="groupMessageForm" onsubmit="sendGroupMessage(event)">
-                        <input type="text" id="groupMessageInput" placeholder="Напишите сообщение..." autocomplete="off">
-                        <button type="submit" class="send-btn">Отправить</button>
-                    </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- CALL SCREEN -->
-    <div id="callScreen">
-        <div class="call-avatar" id="callAvatar"></div>
-        <div class="call-name" id="callName"></div>
-        <div class="call-controls">
-            <button class="call-control-btn camera" id="cameraBtn" onclick="toggleCamera()">📹</button>
-            <button class="call-control-btn screen" id="screenBtn" onclick="toggleScreenShare()">🖥️</button>
-            <button class="call-control-btn hangup" onclick="endCall()">📞</button>
-        </div>
-        <video id="localVideo" style="display:none;" autoplay muted></video>
-        <video id="remoteVideo" style="display:none;" autoplay></video>
-    </div>
-
-    <!-- INCOMING CALL MODAL -->
-    <div id="incomingCallModal" class="modal">
-        <div class="modal-content" style="text-align: center;">
-            <div class="call-avatar" id="incomingCallAvatar" style="margin: 0 auto 24px;"></div>
-            <h3 id="incomingCallName" style="margin-bottom: 32px;"></h3>
-            <div style="display: flex; gap: 24px; justify-content: center;">
-                <button class="action-circle green" style="width: 60px; height: 60px; font-size: 24px;" onclick="acceptCall()">📞</button>
-                <button class="action-circle red" style="width: 60px; height: 60px; font-size: 24px;" onclick="rejectCall()">📞</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- CREATE GROUP MODAL -->
-    <div id="createGroupModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Создать группу</h3>
-            </div>
-
-            <div class="modal-body">
-                <label class="avatar-upload" onclick="document.getElementById('groupAvatarInput').click()">
-                    <span id="groupAvatarPreview">📁</span>
-                    <input type="file" id="groupAvatarInput" accept="image/*" onchange="previewGroupAvatar(event)">
-                </label>
-
-                <div class="input-field">
-                    <label>Название группы</label>
-                    <input type="text" id="groupNameInput">
-                </div>
-
-                <div class="input-field">
-                    <label>Тип группы</label>
-                    <div class="radio-group">
-                        <label class="radio-option selected" onclick="selectGroupType(this, 'community')">
-                            <input type="radio" name="groupType" value="community" checked>
-                            <div>🌐 Сообщество</div>
-                        </label>
-                        <label class="radio-option" onclick="selectGroupType(this, 'gaming')">
-                            <input type="radio" name="groupType" value="gaming">
-                            <div>🎮 Для игр</div>
-                        </label>
-                        <label class="radio-option" onclick="selectGroupType(this, 'friends')">
-                            <input type="radio" name="groupType" value="friends">
-                            <div>👥 Друзья</div>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-secondary" onclick="closeModal('createGroupModal')">Отмена</button>
-                <button class="btn-primary" style="width: auto; margin: 0;" onclick="createGroup()">Создать</button>
+    <!-- CALL OVERLAY -->
+    <div class="call-overlay" id="callOverlay">
+        <div class="call-container">
+            <div class="call-avatar" id="callAvatar">U</div>
+            <div class="call-name" id="callName">Username</div>
+            <div class="call-status" id="callStatus">Звоним...</div>
+            <div class="call-controls" id="callControls">
+                <!-- Dynamic controls -->
             </div>
         </div>
     </div>
 
     <!-- SETTINGS MODAL -->
-    <div id="settingsModal" class="modal">
+    <div class="modal" id="settingsModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3>Настройки</h3>
-            </div>
-
-            <div class="modal-body">
-                <div class="input-field">
-                    <label>Профиль и приватность</label>
-                    <p style="color: var(--accent); font-size: 14px; margin-top: 8px;">Управление профилем и настройками приватности</p>
-                </div>
-
-                <div class="input-field">
-                    <label>Уведомления</label>
-                    <p style="color: var(--accent); font-size: 14px; margin-top: 8px;">Настройка звуков и уведомлений</p>
-                </div>
-
-                <div class="input-field">
-                    <label>Голос и видео</label>
-                    <p style="color: var(--accent); font-size: 14px; margin-top: 8px;">Настройка микрофона и камеры</p>
-                </div>
-
-                <div class="input-field">
-                    <button class="btn-primary" onclick="logout()">Выйти из аккаунта</button>
+            <button class="modal-close" onclick="closeModal('settingsModal')">×</button>
+            <div class="modal-sidebar">
+                <div class="nav-section">
+                    <div class="nav-item active">👤 Профиль</div>
+                    <div class="nav-item">🔒 Приватность</div>
+                    <div class="nav-item">🔔 Уведомления</div>
+                    <div class="nav-item">🎨 Внешний вид</div>
+                    <div class="nav-item">🔑 Безопасность</div>
+                    <div class="nav-item">🚪 Выход</div>
                 </div>
             </div>
-
-            <div class="modal-footer">
-                <button class="btn-secondary" onclick="closeModal('settingsModal')">Закрыть</button>
+            <div class="modal-main">
+                <div class="settings-section">
+                    <h2 class="settings-title">Мой аккаунт</h2>
+                    <div class="form-group">
+                        <label class="form-label">Имя пользователя</label>
+                        <input type="text" class="form-input" value="User#1234">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" value="user@example.com">
+                    </div>
+                    <button class="btn btn-primary">Сохранить изменения</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
         const socket = io();
         let currentUser = null;
         let currentView = 'friends';
-        let currentChat = null;
-        let currentChatType = null; // 'dm' or 'group'
+        let currentDM = null;
         let friends = [];
         let friendRequests = [];
-        let groups = [];
-        let incomingCallData = null;
+        let messages = new Map();
+        let pinnedMessages = new Map();
         let currentCall = null;
-        let localStream = null;
-        let remoteStream = null;
-        let peerConnection = null;
 
-        // АВТОРИЗАЦИЯ
-        function switchAuthTab(tab) {
-            const loginForm = document.getElementById('loginForm');
-            const registerForm = document.getElementById('registerForm');
-            const tabs = document.querySelectorAll('.auth-tab');
+        // ==================== AUTH ====================
+        function showAuthForm(type) {
+            document.querySelectorAll('.auth-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
             
-            tabs.forEach(t => t.classList.remove('active'));
-            
-            if (tab === 'login') {
-                loginForm.classList.remove('hidden');
-                registerForm.classList.add('hidden');
-                tabs[0].classList.add('active');
-            } else {
-                loginForm.classList.add('hidden');
-                registerForm.classList.remove('hidden');
-                tabs[1].classList.add('active');
-            }
-            
-            hideAuthMessages();
+            event.target.classList.add('active');
+            document.getElementById(type + 'Form').classList.add('active');
         }
 
-        async function handleLogin(e) {
+        function handleLogin(e) {
             e.preventDefault();
-            
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            const remember = document.getElementById('rememberMe').checked;
-            
-            try {
-                const response = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password, remember })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    currentUser = data.user;
-                    initApp();
-                } else {
-                    showAuthError(data.error);
-                }
-            } catch (error) {
-                showAuthError('Ошибка подключения к серверу');
-            }
+            // Временно: простой вход
+            const username = 'User' + Math.floor(Math.random() * 10000);
+            socket.emit('register', { username });
         }
 
-        async function handleRegister(e) {
+        function handleRegister(e) {
             e.preventDefault();
-            
-            const name = document.getElementById('registerName').value;
-            const login = document.getElementById('registerLogin').value;
-            const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
-            const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
-            
+            const name = document.getElementById('regName').value;
+            const username = document.getElementById('regUsername').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const passwordConfirm = document.getElementById('regPasswordConfirm').value;
+
             if (password !== passwordConfirm) {
-                showAuthError('Пароли не совпадают');
+                alert('Пароли не совпадают!');
                 return;
             }
-            
-            try {
-                const response = await fetch('/api/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, login, email, password })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    currentUser = data.user;
-                    initApp();
-                } else {
-                    showAuthError(data.error);
-                }
-            } catch (error) {
-                showAuthError('Ошибка подключения к серверу');
-            }
+
+            socket.emit('register', { name, username, email, password });
         }
 
         function loginWithGoogle() {
-            alert('Вход через Google:\n\nДля настройки входа через Google нужно:\n1. Создать проект в Google Cloud Console\n2. Включить Google Sign-In API\n3. Получить Client ID\n4. Добавить Firebase в проект\n\nПока используйте обычную регистрацию!');
+            alert('OAuth Google: Требуется настройка на сервере.\n\n1. Зарегистрируйте приложение в Google Cloud Console\n2. Получите Client ID и Secret\n3. Настройте Redirect URI\n4. Установите passport-google-oauth20');
         }
 
-        function showAuthError(message) {
-            const errorDiv = document.getElementById('authError');
-            errorDiv.textContent = message;
-            errorDiv.classList.remove('hidden');
-            setTimeout(() => errorDiv.classList.add('hidden'), 5000);
+        function loginWithGithub() {
+            alert('OAuth GitHub: Требуется настройка на сервере.\n\n1. Создайте OAuth App на GitHub\n2. Получите Client ID и Secret\n3. Настройте callback URL\n4. Установите passport-github2');
         }
 
-        function showAuthSuccess(message) {
-            const successDiv = document.getElementById('authSuccess');
-            successDiv.textContent = message;
-            successDiv.classList.remove('hidden');
-            setTimeout(() => successDiv.classList.add('hidden'), 5000);
+        function loginWithDiscord() {
+            alert('OAuth Discord: Требуется настройка на сервере.\n\n1. Создайте приложение на Discord Developer Portal\n2. Получите Client ID и Secret\n3. Настройте Redirect URIs\n4. Установите passport-discord');
         }
 
-        function hideAuthMessages() {
-            document.getElementById('authError').classList.add('hidden');
-            document.getElementById('authSuccess').classList.add('hidden');
-        }
-
-        async function logout() {
-            await fetch('/api/logout', { method: 'POST' });
-            location.reload();
-        }
-
-        // ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
-        function initApp() {
+        // ==================== SOCKET EVENTS ====================
+        socket.on('init', (data) => {
+            currentUser = data.user;
+            friends = data.friends || [];
+            friendRequests = data.friendRequests || [];
+            
             document.getElementById('authScreen').style.display = 'none';
             document.getElementById('app').style.display = 'grid';
             
-            // Устанавливаем данные пользователя
-            document.getElementById('userName').textContent = currentUser.name;
-            document.getElementById('userLogin').textContent = '@' + currentUser.login;
-            document.getElementById('userAvatar').textContent = currentUser.avatar;
-            
-            // Инициализируем сокет
-            socket.emit('init-user', currentUser.email);
-            
-            // Показываем начальный вид
-            showFriendsView();
-        }
-
-        // SOCKET СОБЫТИЯ
-        socket.on('user-data', (data) => {
-            friends = data.friends;
-            friendRequests = data.friendRequests;
-            groups = data.groups;
-            
             renderFriends();
-            renderFriendRequests();
-            renderGroups();
         });
 
-        socket.on('new-friend-request', (requester) => {
-            friendRequests.push(requester);
+        socket.on('friend-request', (data) => {
+            friendRequests.push(data);
             renderFriendRequests();
         });
 
         socket.on('friend-added', (friend) => {
             friends.push(friend);
+            friendRequests = friendRequests.filter(r => r.id !== friend.id);
             renderFriends();
         });
 
-        socket.on('friend-accepted', (friend) => {
-            friendRequests = friendRequests.filter(f => f.email !== friend.email);
-            friends.push(friend);
-            renderFriendRequests();
-            renderFriends();
-        });
-
-        socket.on('friend-request-removed', (email) => {
-            friendRequests = friendRequests.filter(f => f.email !== email);
-            renderFriendRequests();
-        });
-
-        socket.on('friend-status', (data) => {
-            const friend = friends.find(f => f.email === data.email);
-            if (friend) {
-                friend.status = data.status;
-                renderFriends();
+        socket.on('message', (msg) => {
+            if (!messages.has(msg.channelId)) {
+                messages.set(msg.channelId, []);
+            }
+            messages.get(msg.channelId).push(msg);
+            
+            if (currentDM === msg.channelId) {
+                renderMessages();
             }
         });
 
-        socket.on('new-dm', (data) => {
-            if (currentChatType === 'dm' && currentChat === data.recipientEmail) {
-                addMessageToChat(data.message);
-            }
-        });
-
-        socket.on('dm-history', (data) => {
-            if (currentChatType === 'dm' && currentChat === data.recipientEmail) {
-                const container = document.getElementById('dmMessages');
-                container.innerHTML = '';
-                data.messages.forEach(msg => addMessageToChat(msg));
-            }
-        });
-
-        socket.on('group-created', (group) => {
-            groups.push(group);
-            renderGroups();
-        });
-
-        socket.on('new-group-message', (data) => {
-            if (currentChatType === 'group' && currentChat === data.channelId) {
-                addMessageToChat(data.message);
-            }
-        });
-
-        socket.on('incoming-call', (data) => {
-            incomingCallData = data;
+        socket.on('call-incoming', (data) => {
             showIncomingCall(data);
         });
 
-        socket.on('call-answered', (data) => {
-            if (peerConnection) {
-                peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
-            }
-        });
+        // ==================== FRIENDS ====================
+        function showFriends() {
+            currentView = 'friends';
+            document.getElementById('friendsView').classList.add('active');
+            document.getElementById('dmView').classList.remove('active');
+            document.getElementById('navHeader').textContent = 'Друзья';
+        }
 
-        socket.on('ice-candidate', async (data) => {
-            if (peerConnection) {
-                await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-            }
-        });
-
-        socket.on('call-ended', () => {
-            endCall();
-        });
-
-        // РЕНДЕРИНГ
-        function renderFriends() {
-            const container = document.getElementById('friendsList');
-            const count = document.getElementById('friendsCount');
+        function switchFriendsTab(tab) {
+            document.querySelectorAll('.friends-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
             
-            container.innerHTML = '';
-            count.textContent = friends.length;
+            const content = document.getElementById('friendsContent');
             
-            friends.forEach(friend => {
-                const div = document.createElement('div');
-                div.className = 'friend-item';
-                div.onclick = () => openDM(friend);
-                
-                div.innerHTML = `
-                    <div class="avatar">
-                        ${friend.avatar}
-                        <div class="status-dot ${friend.status}"></div>
+            if (tab === 'add') {
+                content.innerHTML = `
+                    <div class="friend-request-input">
+                        <input type="text" placeholder="Введите логин пользователя" id="addFriendInput">
+                        <button class="btn btn-primary" onclick="sendFriendRequest()">Добавить</button>
                     </div>
-                    <div class="friend-info">
-                        <div class="friend-name">${friend.name}</div>
-                        <div class="friend-status">${friend.status === 'online' ? 'В сети' : 'Не в сети'}</div>
+                    <div class="sicore-branding">
+                        <h1 class="sicore-title">Sicore</h1>
+                        <p class="sicore-subtitle">Без блокировок и ограничений</p>
                     </div>
                 `;
-                
-                container.appendChild(div);
-            });
+            } else if (tab === 'pending') {
+                renderFriendRequests();
+            } else if (tab === 'online') {
+                renderFriends('online');
+            } else {
+                renderFriends('all');
+            }
+        }
+
+        function renderFriends(filter = 'all') {
+            const content = document.getElementById('friendsContent');
+            let filteredFriends = friends;
+            
+            if (filter === 'online') {
+                filteredFriends = friends.filter(f => f.status === 'online');
+            }
+            
+            if (filteredFriends.length === 0) {
+                content.innerHTML = `
+                    <div class="sicore-branding">
+                        <h1 class="sicore-title">Sicore</h1>
+                        <p class="sicore-subtitle">Без блокировок и ограничений</p>
+                    </div>
+                    <div class="empty-state">
+                        <div class="empty-state-icon">👥</div>
+                        <h3>Нет друзей ${filter === 'online' ? 'онлайн' : ''}</h3>
+                        <p>Добавьте друзей, чтобы начать общение</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            content.innerHTML = `
+                <div class="friends-list">
+                    ${filteredFriends.map(friend => `
+                        <div class="friend-item" onclick="openDM('${friend.id}')">
+                            <div class="friend-avatar">
+                                ${friend.username[0].toUpperCase()}
+                                <div class="status-dot status-${friend.status}"></div>
+                            </div>
+                            <div class="friend-info">
+                                <div class="friend-name">${friend.username}</div>
+                                <div class="friend-status">${friend.status === 'online' ? 'В сети' : 'Не в сети'}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
         }
 
         function renderFriendRequests() {
-            const container = document.getElementById('friendRequestsList');
-            const count = document.getElementById('requestsCount');
+            const content = document.getElementById('friendsContent');
             
-            container.innerHTML = '';
-            count.textContent = friendRequests.length;
-            
-            friendRequests.forEach(request => {
-                const div = document.createElement('div');
-                div.className = 'friend-request-item';
-                
-                div.innerHTML = `
-                    <div class="avatar">${request.avatar}</div>
-                    <div class="friend-request-info">
-                        <div class="friend-request-name">${request.name}</div>
-                        <div class="friend-request-login">@${request.login}</div>
-                    </div>
-                    <div class="friend-request-actions">
-                        <button class="action-circle green" onclick="acceptFriendRequest('${request.email}')">✓</button>
-                        <button class="action-circle red" onclick="rejectFriendRequest('${request.email}')">✕</button>
+            if (friendRequests.length === 0) {
+                content.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <h3>Нет входящих запросов</h3>
+                        <p>Здесь будут отображаться запросы в друзья</p>
                     </div>
                 `;
-                
-                container.appendChild(div);
-            });
-        }
-
-        function renderGroups() {
-            const container = document.getElementById('groupsList');
-            container.innerHTML = '';
-            
-            groups.forEach(group => {
-                const div = document.createElement('div');
-                div.className = 'group-item';
-                div.onclick = () => openGroup(group);
-                
-                div.innerHTML = `
-                    <div class="avatar">${group.avatar}</div>
-                    <div class="friend-info">
-                        <div class="friend-name">${group.name}</div>
-                        <div class="friend-status">${group.members.length} участников</div>
-                    </div>
-                `;
-                
-                container.appendChild(div);
-            });
-        }
-
-        // ДРУЗЬЯ
-        function switchFriendTab(tab) {
-            const tabs = document.querySelectorAll('.friend-tab');
-            tabs.forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            const addSection = document.getElementById('addFriendSection');
-            
-            if (tab === 'add') {
-                addSection.classList.remove('hidden');
-            } else {
-                addSection.classList.add('hidden');
+                return;
             }
             
-            // Фильтрация друзей
-            const list = document.getElementById('friendsViewList');
-            list.innerHTML = '';
-            
-            let filteredFriends = friends;
-            
-            if (tab === 'online') {
-                filteredFriends = friends.filter(f => f.status === 'online');
-            } else if (tab === 'offline') {
-                filteredFriends = friends.filter(f => f.status === 'offline');
-            }
-            
-            filteredFriends.forEach(friend => {
-                const div = document.createElement('div');
-                div.className = 'friend-item';
-                div.onclick = () => openDM(friend);
-                
-                div.innerHTML = `
-                    <div class="avatar">
-                        ${friend.avatar}
-                        <div class="status-dot ${friend.status}"></div>
-                    </div>
-                    <div class="friend-info">
-                        <div class="friend-name">${friend.name}</div>
-                        <div class="friend-status">${friend.status === 'online' ? 'В сети' : 'Не в сети'}</div>
-                    </div>
-                `;
-                
-                list.appendChild(div);
-            });
+            content.innerHTML = `
+                <div class="friends-list">
+                    ${friendRequests.map(request => `
+                        <div class="friend-request-item">
+                            <div class="friend-avatar">${request.username[0].toUpperCase()}</div>
+                            <div class="friend-info">
+                                <div class="friend-name">${request.username}</div>
+                                <div class="friend-status">Хочет добавить вас в друзья</div>
+                            </div>
+                            <div class="friend-actions">
+                                <button class="action-btn accept" onclick="acceptFriend('${request.id}')" title="Принять">✓</button>
+                                <button class="action-btn decline" onclick="declineFriend('${request.id}')" title="Отклонить">✕</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
         }
 
         function sendFriendRequest() {
-            const login = document.getElementById('addFriendInput').value.trim();
-            if (login) {
-                socket.emit('send-friend-request', login);
+            const username = document.getElementById('addFriendInput').value.trim();
+            if (username) {
+                socket.emit('send-friend-request', username);
                 document.getElementById('addFriendInput').value = '';
             }
         }
 
-        function acceptFriendRequest(email) {
-            socket.emit('accept-friend-request', email);
+        function acceptFriend(userId) {
+            socket.emit('accept-friend', userId);
         }
 
-        function rejectFriendRequest(email) {
-            socket.emit('reject-friend-request', email);
+        function declineFriend(userId) {
+            friendRequests = friendRequests.filter(r => r.id !== userId);
+            socket.emit('decline-friend', userId);
+            renderFriendRequests();
         }
 
-        // ЧАТ
-        function showFriendsView() {
-            document.getElementById('friendsView').classList.remove('hidden');
-            document.getElementById('dmChatView').classList.add('hidden');
-            document.getElementById('groupChatView').classList.add('hidden');
+        // ==================== DM ====================
+        function openDM(friendId) {
+            const friend = friends.find(f => f.id === friendId);
+            if (!friend) return;
             
-            currentView = 'friends';
-            currentChat = null;
-            currentChatType = null;
+            currentDM = `dm-${friendId}`;
+            currentView = 'dm';
             
-            switchFriendTab('all');
+            document.getElementById('friendsView').classList.remove('active');
+            document.getElementById('dmView').classList.add('active');
+            
+            document.getElementById('dmUserAvatar').textContent = friend.username[0].toUpperCase();
+            document.getElementById('dmUserName').textContent = friend.username;
+            
+            socket.emit('open-dm', friendId);
+            renderMessages();
         }
 
-        function openDM(friend) {
-            currentChat = friend.email;
-            currentChatType = 'dm';
+        function renderMessages() {
+            const container = document.getElementById('messagesContainer');
+            const msgs = messages.get(currentDM) || [];
             
-            document.getElementById('friendsView').classList.add('hidden');
-            document.getElementById('dmChatView').classList.remove('hidden');
-            document.getElementById('groupChatView').classList.add('hidden');
-            
-            document.getElementById('dmUserName').textContent = friend.name;
-            document.getElementById('dmUserStatus').textContent = friend.status === 'online' ? 'В сети' : 'Не в сети';
-            document.getElementById('dmUserAvatar').textContent = friend.avatar;
-            document.querySelector('#dmUserAvatar .status-dot').className = `status-dot ${friend.status}`;
-            
-            document.getElementById('dmMessages').innerHTML = '';
-            socket.emit('get-dm-history', friend.email);
-        }
-
-        function openGroup(group) {
-            currentChat = group.channels[0].id;
-            currentChatType = 'group';
-            
-            document.getElementById('friendsView').classList.add('hidden');
-            document.getElementById('dmChatView').classList.add('hidden');
-            document.getElementById('groupChatView').classList.remove('hidden');
-            
-            document.getElementById('groupName').textContent = group.name;
-            document.getElementById('groupMembersCount').textContent = `${group.members.length} участников`;
-            document.getElementById('groupAvatar').textContent = group.avatar;
-            
-            document.getElementById('groupMessages').innerHTML = '';
-        }
-
-        function sendDM(e) {
-            e.preventDefault();
-            const input = document.getElementById('dmMessageInput');
-            const message = input.value.trim();
-            
-            if (message && currentChat) {
-                socket.emit('send-dm', {
-                    recipientEmail: currentChat,
-                    message: message
-                });
-                input.value = '';
-            }
-        }
-
-        function sendGroupMessage(e) {
-            e.preventDefault();
-            const input = document.getElementById('groupMessageInput');
-            const message = input.value.trim();
-            
-            if (message && currentChat) {
-                socket.emit('send-group-message', {
-                    channelId: currentChat,
-                    groupId: currentChat.split('_')[0] + '_' + currentChat.split('_')[1],
-                    message: message
-                });
-                input.value = '';
-            }
-        }
-
-        function addMessageToChat(msg) {
-            const container = currentChatType === 'dm' 
-                ? document.getElementById('dmMessages')
-                : document.getElementById('groupMessages');
-            
-            const div = document.createElement('div');
-            div.className = 'message-item';
-            div.dataset.messageId = msg.id;
-            
-            const isCurrentUser = msg.from === currentUser.email || msg.fromName === currentUser.name;
-            
-            div.innerHTML = `
-                <div class="avatar">${msg.fromAvatar}</div>
-                <div class="message-content-wrap">
-                    <div class="message-header">
-                        <span class="message-author">${msg.fromName}</span>
-                        <span class="message-time">${msg.time}</span>
+            if (msgs.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">💬</div>
+                        <h3>Начните общение</h3>
+                        <p>Это начало вашей переписки</p>
                     </div>
-                    <div class="message-text">${escapeHtml(msg.message)}</div>
-                </div>
-                <div class="message-actions">
-                    <button class="message-action-btn" onclick="pinMessage('${msg.id}')" title="Закрепить">📌</button>
-                </div>
-            `;
+                `;
+                return;
+            }
             
-            container.appendChild(div);
+            container.innerHTML = msgs.map(msg => `
+                <div class="message">
+                    <div class="message-avatar">${msg.author[0].toUpperCase()}</div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="message-author">${msg.author}</span>
+                            <span class="message-time">${msg.time}</span>
+                        </div>
+                        <div class="message-text">${escapeHtml(msg.text)}</div>
+                    </div>
+                    <div class="message-options">
+                        <button class="icon-btn" onclick="pinMessage('${msg.id}')">📌</button>
+                    </div>
+                </div>
+            `).join('');
+            
             container.scrollTop = container.scrollHeight;
         }
 
+        function sendMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            
+            if (text && currentDM) {
+                socket.emit('send-message', { channelId: currentDM, text });
+                input.value = '';
+            }
+        }
+
         function pinMessage(messageId) {
-            socket.emit('pin-message', {
-                chatId: currentChat,
-                messageId: messageId
-            });
+            socket.emit('pin-message', { channelId: currentDM, messageId });
         }
 
-        function togglePinnedMessages() {
-            const banner = document.getElementById('pinnedBanner');
-            banner.classList.toggle('active');
+        function togglePinned() {
+            document.getElementById('pinnedPanel').classList.toggle('active');
         }
 
-        // ГРУППЫ
-        function showCreateGroupModal() {
-            document.getElementById('createGroupModal').classList.add('active');
-        }
-
-        function selectGroupType(element, type) {
-            document.querySelectorAll('.radio-option').forEach(opt => opt.classList.remove('selected'));
-            element.classList.add('selected');
-            element.querySelector('input').checked = true;
-        }
-
-        function previewGroupAvatar(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('groupAvatarPreview').innerHTML = `<img src="${e.target.result}">`;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function createGroup() {
-            const name = document.getElementById('groupNameInput').value.trim();
-            const type = document.querySelector('input[name="groupType"]:checked').value;
+        // ==================== CALLS ====================
+        function startCall(type) {
+            if (!currentDM) return;
             
-            if (name) {
-                socket.emit('create-group', { name, type });
-                closeModal('createGroupModal');
-                document.getElementById('groupNameInput').value = '';
-                document.getElementById('groupAvatarPreview').innerHTML = '📁';
-            }
-        }
-
-        // ЗВОНКИ
-        async function startCall(type) {
-            if (!currentChat || currentChatType !== 'dm') return;
+            const friend = friends.find(f => `dm-${f.id}` === currentDM);
+            if (!friend) return;
             
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({
-                    audio: true,
-                    video: type === 'video'
-                });
-                
-                peerConnection = new RTCPeerConnection({
-                    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-                });
-                
-                localStream.getTracks().forEach(track => {
-                    peerConnection.addTrack(track, localStream);
-                });
-                
-                peerConnection.ontrack = (event) => {
-                    remoteStream = event.streams[0];
-                    document.getElementById('remoteVideo').srcObject = remoteStream;
-                };
-                
-                peerConnection.onicecandidate = (event) => {
-                    if (event.candidate) {
-                        socket.emit('ice-candidate', {
-                            recipientEmail: currentChat,
-                            candidate: event.candidate
-                        });
-                    }
-                };
-                
-                const offer = await peerConnection.createOffer();
-                await peerConnection.setLocalDescription(offer);
-                
-                socket.emit('call-user', {
-                    recipientEmail: currentChat,
-                    offer: offer,
-                    callType: type
-                });
-                
-                showCallScreen();
-                
-            } catch (error) {
-                console.error('Ошибка при инициации звонка:', error);
-                alert('Не удалось получить доступ к микрофону/камере');
-            }
+            currentCall = { type, friendId: friend.id, status: 'calling' };
+            
+            document.getElementById('callOverlay').classList.add('active');
+            document.getElementById('callAvatar').textContent = friend.username[0].toUpperCase();
+            document.getElementById('callName').textContent = friend.username;
+            document.getElementById('callStatus').textContent = 'Звоним...';
+            document.getElementById('callControls').innerHTML = `
+                <button class="call-btn camera" onclick="toggleCamera()">📹</button>
+                <button class="call-btn screen" onclick="toggleScreen()">🖥️</button>
+                <button class="call-btn hangup" onclick="endCall()">📞</button>
+            `;
+            
+            socket.emit('start-call', { friendId: friend.id, type });
         }
 
         function showIncomingCall(data) {
-            incomingCallData = data;
-            document.getElementById('incomingCallName').textContent = data.fromName;
-            document.getElementById('incomingCallAvatar').textContent = data.fromAvatar;
-            document.getElementById('incomingCallModal').classList.add('active');
-        }
-
-        async function acceptCall() {
-            closeModal('incomingCallModal');
+            const friend = friends.find(f => f.id === data.from);
+            if (!friend) return;
             
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({
-                    audio: true,
-                    video: incomingCallData.callType === 'video'
-                });
-                
-                peerConnection = new RTCPeerConnection({
-                    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-                });
-                
-                localStream.getTracks().forEach(track => {
-                    peerConnection.addTrack(track, localStream);
-                });
-                
-                peerConnection.ontrack = (event) => {
-                    remoteStream = event.streams[0];
-                    document.getElementById('remoteVideo').srcObject = remoteStream;
-                };
-                
-                peerConnection.onicecandidate = (event) => {
-                    if (event.candidate) {
-                        socket.emit('ice-candidate', {
-                            recipientEmail: incomingCallData.from,
-                            candidate: event.candidate
-                        });
-                    }
-                };
-                
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(incomingCallData.offer));
-                
-                const answer = await peerConnection.createAnswer();
-                await peerConnection.setLocalDescription(answer);
-                
-                socket.emit('answer-call', {
-                    recipientEmail: incomingCallData.from,
-                    answer: answer
-                });
-                
-                showCallScreen();
-                
-            } catch (error) {
-                console.error('Ошибка при принятии звонка:', error);
-            }
+            currentCall = { type: data.type, friendId: friend.id, status: 'incoming' };
+            
+            document.getElementById('callOverlay').classList.add('active');
+            document.getElementById('callAvatar').textContent = friend.username[0].toUpperCase();
+            document.getElementById('callName').textContent = friend.username;
+            document.getElementById('callStatus').textContent = 'Входящий звонок...';
+            document.getElementById('callControls').innerHTML = `
+                <button class="call-btn answer" onclick="answerCall()">📞</button>
+                <button class="call-btn hangup" onclick="endCall()">📞</button>
+            `;
         }
 
-        function rejectCall() {
-            closeModal('incomingCallModal');
-            if (incomingCallData) {
-                socket.emit('end-call', incomingCallData.from);
-            }
-        }
-
-        function showCallScreen() {
-            const friend = friends.find(f => f.email === currentChat);
-            if (friend) {
-                document.getElementById('callName').textContent = friend.name;
-                document.getElementById('callAvatar').textContent = friend.avatar;
-            }
-            document.getElementById('callScreen').style.display = 'flex';
+        function answerCall() {
+            if (!currentCall) return;
+            
+            currentCall.status = 'active';
+            document.getElementById('callStatus').textContent = 'В разговоре';
+            document.getElementById('callControls').innerHTML = `
+                <button class="call-btn camera" onclick="toggleCamera()">📹</button>
+                <button class="call-btn screen" onclick="toggleScreen()">🖥️</button>
+                <button class="call-btn hangup" onclick="endCall()">📞</button>
+            `;
+            
+            socket.emit('answer-call', currentCall.friendId);
         }
 
         function endCall() {
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
+            if (currentCall) {
+                socket.emit('end-call', currentCall.friendId);
             }
-            
-            if (peerConnection) {
-                peerConnection.close();
-            }
-            
-            if (currentChat) {
-                socket.emit('end-call', currentChat);
-            }
-            
-            document.getElementById('callScreen').style.display = 'none';
-            
-            localStream = null;
-            remoteStream = null;
-            peerConnection = null;
+            currentCall = null;
+            document.getElementById('callOverlay').classList.remove('active');
         }
 
         function toggleCamera() {
-            if (localStream) {
-                const videoTrack = localStream.getVideoTracks()[0];
-                if (videoTrack) {
-                    videoTrack.enabled = !videoTrack.enabled;
-                    document.getElementById('cameraBtn').style.opacity = videoTrack.enabled ? 1 : 0.5;
-                }
-            }
+            event.target.classList.toggle('active');
         }
 
-        async function toggleScreenShare() {
-            try {
-                const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-                const screenTrack = screenStream.getVideoTracks()[0];
-                
-                const sender = peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-                if (sender) {
-                    sender.replaceTrack(screenTrack);
-                }
-                
-                screenTrack.onended = () => {
-                    const videoTrack = localStream.getVideoTracks()[0];
-                    sender.replaceTrack(videoTrack);
-                };
-            } catch (error) {
-                console.error('Ошибка демонстрации экрана:', error);
-            }
+        function toggleScreen() {
+            event.target.classList.toggle('active');
         }
 
-        // УТИЛИТЫ
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-
+        // ==================== SETTINGS ====================
         function showSettings() {
             document.getElementById('settingsModal').classList.add('active');
         }
 
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        function showCreateServerModal() {
+            alert('Создание сервера - в разработке');
+        }
+
+        // ==================== UTILS ====================
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
-
-        // ПРОВЕРКА СЕССИИ ПРИ ЗАГРУЗКЕ
-        window.addEventListener('load', async () => {
-            try {
-                const response = await fetch('/api/check-session');
-                const data = await response.json();
-                
-                if (data.loggedIn) {
-                    currentUser = data.user;
-                    initApp();
-                }
-            } catch (error) {
-                console.error('Ошибка проверки сессии:', error);
-            }
-        });
     </script>
 </body>
 </html>
