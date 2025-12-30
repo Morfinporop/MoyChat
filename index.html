@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CoffeeChat - Общение с друзьями</title>
+    <title>Sicore - Без блокировок и ограничений</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -23,86 +23,153 @@
             --accent: #A1887F;
             --online: #4CAF50;
             --offline: #9E9E9E;
+            --red: #e74c3c;
+            --green: #2ecc71;
         }
 
         body {
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, var(--coffee-dark) 0%, var(--coffee-brown) 100%);
             color: var(--cream);
-            height: 100vh;
             overflow: hidden;
         }
 
-        /* LOGIN SCREEN */
-        #loginScreen {
+        /* AUTH SCREEN */
+        #authScreen {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             background: 
                 radial-gradient(circle at 20% 50%, rgba(141, 110, 99, 0.1) 0%, transparent 50%),
                 radial-gradient(circle at 80% 50%, rgba(161, 136, 127, 0.1) 0%, transparent 50%),
                 linear-gradient(135deg, var(--coffee-dark) 0%, var(--coffee-brown) 100%);
+            position: relative;
+            overflow: auto;
         }
 
-        .login-box {
-            background: rgba(62, 39, 35, 0.8);
-            backdrop-filter: blur(20px);
-            padding: 50px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        .watermark {
+            position: absolute;
+            right: 15%;
+            top: 50%;
+            transform: translateY(-50%) rotate(-15deg);
             text-align: center;
-            border: 1px solid rgba(161, 136, 127, 0.2);
-            min-width: 400px;
+            pointer-events: none;
+            opacity: 0.15;
         }
 
-        .login-box h1 {
-            font-size: 36px;
-            margin-bottom: 10px;
+        .watermark h1 {
+            font-size: 120px;
+            font-weight: 700;
             background: linear-gradient(135deg, var(--cream) 0%, var(--accent) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-weight: 700;
-        }
-
-        .login-box p {
-            color: var(--accent);
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-
-        .input-group {
             margin-bottom: 20px;
         }
 
-        .input-group input {
+        .watermark p {
+            font-size: 32px;
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .auth-container {
+            background: rgba(62, 39, 35, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 50px;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(161, 136, 127, 0.2);
+            min-width: 450px;
+            max-width: 500px;
+            z-index: 10;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 12px;
+            background: rgba(45, 27, 18, 0.6);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            color: var(--accent);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .auth-tab.active {
+            background: var(--coffee-medium);
+            border-color: var(--accent);
+            color: var(--cream);
+        }
+
+        .input-field {
+            margin-bottom: 20px;
+        }
+
+        .input-field label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--cream-dark);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .input-field input {
             width: 100%;
-            padding: 15px 20px;
+            padding: 14px 18px;
             background: rgba(45, 27, 18, 0.6);
             border: 2px solid var(--coffee-medium);
-            border-radius: 10px;
+            border-radius: 12px;
             color: var(--cream);
-            font-size: 16px;
+            font-size: 15px;
             transition: all 0.3s;
         }
 
-        .input-group input:focus {
+        .input-field input:focus {
             outline: none;
             border-color: var(--accent);
             background: rgba(45, 27, 18, 0.8);
         }
 
+        .checkbox-field {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .checkbox-field input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .checkbox-field label {
+            color: var(--cream-dark);
+            font-size: 14px;
+            cursor: pointer;
+        }
+
         .btn-primary {
             width: 100%;
-            padding: 15px;
+            padding: 16px;
             background: linear-gradient(135deg, var(--coffee-medium) 0%, var(--coffee-light) 100%);
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             color: var(--cream);
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
+            margin-bottom: 16px;
         }
 
         .btn-primary:hover {
@@ -110,158 +177,129 @@
             box-shadow: 0 10px 30px rgba(141, 110, 99, 0.4);
         }
 
+        .btn-google {
+            background: white;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .btn-google:hover {
+            background: #f5f5f5;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 24px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 1px;
+            background: var(--coffee-medium);
+        }
+
+        .divider span {
+            background: rgba(62, 39, 35, 0.95);
+            padding: 0 16px;
+            position: relative;
+            color: var(--accent);
+            font-size: 14px;
+        }
+
         /* MAIN APP */
         #app {
             display: none;
             height: 100vh;
-            grid-template-columns: 80px 240px 1fr 280px;
-            grid-template-rows: 1fr;
+            grid-template-columns: 280px 1fr;
         }
 
-        /* SIDEBAR - Серверы */
-        .servers-sidebar {
-            background: var(--coffee-dark);
-            padding: 12px 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            overflow-y: auto;
-            border-right: 1px solid rgba(161, 136, 127, 0.1);
-        }
-
-        .server-icon {
-            width: 56px;
-            height: 56px;
-            background: var(--coffee-brown);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 24px;
-            position: relative;
-        }
-
-        .server-icon:hover {
-            border-radius: 12px;
-            background: var(--coffee-medium);
-        }
-
-        .server-icon.active {
-            border-radius: 12px;
-            background: var(--accent);
-        }
-
-        .server-icon.active::before {
-            content: '';
-            position: absolute;
-            left: -12px;
-            width: 4px;
-            height: 40px;
-            background: var(--cream);
-            border-radius: 0 4px 4px 0;
-        }
-
-        /* CHANNELS SIDEBAR */
-        .channels-sidebar {
+        /* SIDEBAR */
+        .sidebar {
             background: var(--coffee-brown);
             display: flex;
             flex-direction: column;
             border-right: 1px solid rgba(161, 136, 127, 0.1);
         }
 
-        .server-header {
-            padding: 16px;
-            border-bottom: 1px solid rgba(161, 136, 127, 0.1);
-            font-weight: 600;
-            font-size: 16px;
-        }
-
-        .channels-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px 8px;
-        }
-
-        .channel-category {
-            margin-bottom: 20px;
-        }
-
-        .category-title {
-            font-size: 12px;
-            color: var(--accent);
-            font-weight: 600;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-            padding: 0 8px;
-        }
-
-        .channel-item {
-            padding: 8px 12px;
-            margin: 2px 0;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 15px;
-        }
-
-        .channel-item:hover {
-            background: rgba(161, 136, 127, 0.2);
-        }
-
-        .channel-item.active {
-            background: var(--coffee-medium);
-            color: var(--cream);
-        }
-
-        /* CHAT AREA */
-        .chat-container {
-            display: flex;
-            flex-direction: column;
-            background: linear-gradient(180deg, var(--coffee-brown) 0%, var(--coffee-dark) 100%);
-        }
-
-        .chat-header {
-            padding: 16px 20px;
+        .sidebar-header {
+            padding: 20px;
             border-bottom: 1px solid rgba(161, 136, 127, 0.1);
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 12px;
-            background: rgba(45, 27, 18, 0.4);
         }
 
-        .chat-header h2 {
+        .sidebar-header h2 {
             font-size: 18px;
             font-weight: 600;
         }
 
-        .messages-area {
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: rgba(161, 136, 127, 0.2);
+            border: none;
+            color: var(--cream);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .icon-btn:hover {
+            background: var(--accent);
+        }
+
+        .sidebar-content {
             flex: 1;
             overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
+            padding: 16px;
         }
 
-        .message {
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 12px;
+            color: var(--accent);
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            padding: 0 8px;
+        }
+
+        .friend-item, .group-item {
+            padding: 12px;
+            margin: 4px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
             display: flex;
+            align-items: center;
             gap: 12px;
-            padding: 8px 12px;
-            border-radius: 8px;
-            transition: background 0.2s;
         }
 
-        .message:hover {
-            background: rgba(161, 136, 127, 0.1);
+        .friend-item:hover, .group-item:hover {
+            background: rgba(161, 136, 127, 0.2);
         }
 
-        .message-avatar {
+        .friend-item.active, .group-item.active {
+            background: var(--coffee-medium);
+        }
+
+        .avatar {
             width: 40px;
             height: 40px;
             border-radius: 50%;
@@ -270,21 +308,148 @@
             align-items: center;
             justify-content: center;
             font-weight: 600;
+            font-size: 16px;
+            position: relative;
             flex-shrink: 0;
         }
 
-        .message-content {
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .status-dot {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid var(--coffee-brown);
+        }
+
+        .status-dot.online { background: var(--online); }
+        .status-dot.offline { background: var(--offline); }
+
+        .friend-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .friend-name {
+            font-weight: 500;
+            font-size: 15px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .friend-status {
+            font-size: 12px;
+            color: var(--accent);
+        }
+
+        .user-panel {
+            padding: 16px;
+            border-top: 1px solid rgba(161, 136, 127, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* CHAT AREA */
+        .chat-area {
+            display: flex;
+            flex-direction: column;
+            background: var(--coffee-dark);
+        }
+
+        .chat-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(161, 136, 127, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(62, 39, 35, 0.6);
+        }
+
+        .chat-header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .chat-header-right {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(161, 136, 127, 0.2);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .action-circle:hover {
+            background: var(--accent);
+        }
+
+        .action-circle.green {
+            background: var(--green);
+        }
+
+        .action-circle.red {
+            background: var(--red);
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 10px;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .message-item:hover {
+            background: rgba(161, 136, 127, 0.1);
+        }
+
+        .message-item:hover .message-actions {
+            display: flex;
+        }
+
+        .message-content-wrap {
             flex: 1;
         }
 
         .message-header {
             display: flex;
-            align-items: baseline;
-            gap: 8px;
-            margin-bottom: 4px;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 6px;
         }
 
-        .message-username {
+        .message-author {
             font-weight: 600;
             color: var(--cream);
         }
@@ -299,27 +464,57 @@
             line-height: 1.5;
         }
 
-        /* MESSAGE INPUT */
-        .message-input-area {
-            padding: 20px;
-            background: rgba(45, 27, 18, 0.6);
+        .message-actions {
+            position: absolute;
+            top: -12px;
+            right: 12px;
+            background: var(--coffee-brown);
+            border-radius: 8px;
+            padding: 4px;
+            display: none;
+            gap: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
-        .message-input-wrapper {
+        .message-action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: transparent;
+            border: none;
+            color: var(--cream);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .message-action-btn:hover {
+            background: var(--accent);
+        }
+
+        .message-input-container {
+            padding: 20px 24px;
+            background: rgba(62, 39, 35, 0.6);
+            border-top: 1px solid rgba(161, 136, 127, 0.1);
+        }
+
+        .message-input-wrap {
             display: flex;
             gap: 12px;
-            background: var(--coffee-dark);
+            background: var(--coffee-brown);
             border-radius: 12px;
             padding: 12px 16px;
             border: 2px solid transparent;
             transition: border 0.3s;
         }
 
-        .message-input-wrapper:focus-within {
+        .message-input-wrap:focus-within {
             border-color: var(--accent);
         }
 
-        .message-input-wrapper input {
+        .message-input-wrap input {
             flex: 1;
             background: none;
             border: none;
@@ -327,14 +522,14 @@
             font-size: 15px;
         }
 
-        .message-input-wrapper input:focus {
+        .message-input-wrap input:focus {
             outline: none;
         }
 
         .send-btn {
             background: var(--accent);
             border: none;
-            padding: 8px 20px;
+            padding: 10px 24px;
             border-radius: 8px;
             color: var(--cream);
             font-weight: 600;
@@ -346,171 +541,269 @@
             background: var(--coffee-light);
         }
 
-        /* MEMBERS SIDEBAR */
-        .members-sidebar {
-            background: var(--coffee-brown);
-            padding: 20px 16px;
-            overflow-y: auto;
-            border-left: 1px solid rgba(161, 136, 127, 0.1);
+        /* FRIENDS VIEW */
+        #friendsView {
+            display: none;
         }
 
-        .members-section {
-            margin-bottom: 24px;
+        .friends-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(161, 136, 127, 0.1);
+            background: rgba(62, 39, 35, 0.6);
         }
 
-        .members-title {
-            font-size: 12px;
+        .friends-tabs {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .friend-tab {
+            padding: 8px 16px;
+            background: transparent;
+            border: none;
             color: var(--accent);
-            font-weight: 600;
-            text-transform: uppercase;
-            margin-bottom: 12px;
-        }
-
-        .member-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 8px 12px;
-            border-radius: 6px;
             cursor: pointer;
-            transition: all 0.2s;
-            margin-bottom: 4px;
-        }
-
-        .member-item:hover {
-            background: rgba(161, 136, 127, 0.2);
-        }
-
-        .member-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 14px;
-            position: relative;
-        }
-
-        .status-indicator {
-            position: absolute;
-            bottom: -2px;
-            right: -2px;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            border: 2px solid var(--coffee-brown);
-        }
-
-        .status-online { background: var(--online); }
-        .status-offline { background: var(--offline); }
-
-        .member-name {
-            font-size: 14px;
+            border-radius: 8px;
+            transition: all 0.3s;
             font-weight: 500;
         }
 
-        /* BUTTONS */
-        .icon-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            background: rgba(161, 136, 127, 0.2);
-            border: none;
+        .friend-tab.active {
+            background: var(--accent);
             color: var(--cream);
-            cursor: pointer;
-            transition: all 0.3s;
+        }
+
+        .add-friend-section {
+            background: rgba(45, 27, 18, 0.4);
+            padding: 16px;
+            border-radius: 12px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .add-friend-section input {
+            flex: 1;
+            padding: 12px 16px;
+            background: var(--coffee-dark);
+            border: 2px solid var(--coffee-medium);
+            border-radius: 8px;
+            color: var(--cream);
+        }
+
+        .add-friend-section input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .friends-list {
+            padding: 24px;
+        }
+
+        .friend-request-item {
+            background: rgba(62, 39, 35, 0.6);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 16px;
         }
 
-        .icon-btn:hover {
-            background: var(--accent);
+        .friend-request-info {
+            flex: 1;
         }
 
-        /* VOICE PANEL */
-        .voice-panel {
-            background: rgba(45, 27, 18, 0.8);
-            padding: 20px;
-            border-radius: 12px;
-            margin: 20px;
-            text-align: center;
+        .friend-request-name {
+            font-weight: 600;
+            margin-bottom: 4px;
         }
 
-        .voice-panel.active {
-            border: 2px solid var(--online);
+        .friend-request-login {
+            font-size: 14px;
+            color: var(--accent);
         }
 
-        .voice-users {
+        .friend-request-actions {
             display: flex;
-            flex-wrap: wrap;
             gap: 12px;
-            margin-top: 16px;
-            justify-content: center;
         }
 
-        .voice-user {
-            display: flex;
+        /* CALL SCREEN */
+        #callScreen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(45, 27, 18, 0.98);
+            z-index: 1000;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
         }
 
-        .voice-user-avatar {
-            width: 48px;
-            height: 48px;
+        .call-avatar {
+            width: 160px;
+            height: 160px;
             border-radius: 50%;
             background: var(--accent);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 600;
-            border: 3px solid var(--online);
+            font-size: 64px;
+            margin-bottom: 24px;
+            position: relative;
         }
 
-        /* ADD FRIEND BUTTON */
-        .add-friend-btn {
+        .call-avatar.speaking {
+            box-shadow: 0 0 0 8px var(--coffee-light),
+                        0 0 0 16px var(--coffee-medium);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 var(--coffee-light),
+                           0 0 0 8px var(--coffee-medium);
+            }
+            50% {
+                box-shadow: 0 0 0 8px var(--coffee-light),
+                           0 0 0 16px var(--coffee-medium);
+            }
+        }
+
+        .call-name {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 40px;
+        }
+
+        .call-controls {
+            display: flex;
+            gap: 24px;
+        }
+
+        .call-control-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .call-control-btn.camera {
+            background: var(--coffee-medium);
+            color: var(--cream);
+        }
+
+        .call-control-btn.screen {
+            background: var(--coffee-medium);
+            color: var(--cream);
+        }
+
+        .call-control-btn.hangup {
+            background: var(--red);
+            color: white;
+        }
+
+        .call-control-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            padding: 12px;
-            background: rgba(161, 136, 127, 0.2);
-            border: 2px dashed var(--accent);
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--coffee-brown);
+            padding: 32px;
+            border-radius: 16px;
+            min-width: 400px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            margin-bottom: 24px;
+        }
+
+        .modal-header h3 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .modal-body {
+            margin-bottom: 24px;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .btn-secondary {
+            padding: 12px 24px;
+            background: var(--coffee-dark);
+            border: 2px solid var(--accent);
             border-radius: 8px;
             color: var(--cream);
             cursor: pointer;
-            margin-bottom: 12px;
             transition: all 0.3s;
         }
 
-        .add-friend-btn:hover {
-            background: rgba(161, 136, 127, 0.3);
-            border-style: solid;
+        .btn-secondary:hover {
+            background: var(--accent);
         }
 
-        /* NOTIFICATION */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--coffee-brown);
-            padding: 16px 24px;
-            border-radius: 12px;
-            border-left: 4px solid var(--accent);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-            animation: slideIn 0.3s ease;
-            z-index: 1000;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            #app {
+                grid-template-columns: 1fr;
             }
-            to {
-                transform: translateX(0);
-                opacity: 1;
+
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                top: 0;
+                height: 100vh;
+                z-index: 100;
+                transition: left 0.3s;
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+
+            .auth-container {
+                min-width: 90%;
+                padding: 30px 20px;
+            }
+
+            .watermark {
+                display: none;
             }
         }
 
@@ -532,572 +825,366 @@
             background: var(--accent);
         }
 
-        /* MODAL */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
+        .hidden {
+            display: none !important;
         }
 
-        .modal.active {
+        /* PINNED MESSAGES */
+        .pinned-banner {
+            background: rgba(161, 136, 127, 0.2);
+            padding: 12px 24px;
+            border-bottom: 1px solid rgba(161, 136, 127, 0.1);
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .pinned-banner.active {
             display: flex;
         }
 
-        .modal-content {
-            background: var(--coffee-brown);
-            padding: 30px;
-            border-radius: 16px;
-            min-width: 400px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        /* CREATE GROUP FORM */
+        .avatar-upload {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin: 0 auto 24px;
+            font-size: 48px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .modal-content h3 {
-            margin-bottom: 20px;
-            color: var(--cream);
+        .avatar-upload input {
+            display: none;
+        }
+
+        .avatar-upload img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .radio-option {
+            flex: 1;
+            padding: 16px;
+            background: rgba(45, 27, 18, 0.6);
+            border: 2px solid var(--coffee-medium);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .radio-option input {
+            display: none;
+        }
+
+        .radio-option.selected {
+            border-color: var(--accent);
+            background: rgba(161, 136, 127, 0.2);
         }
     </style>
 </head>
 <body>
-    <!-- LOGIN SCREEN -->
-    <div id="loginScreen">
-        <div class="login-box">
-            <h1>☕ CoffeeChat</h1>
-            <p>Уютное общение с друзьями</p>
-            <div class="input-group">
-                <input type="text" id="usernameInput" placeholder="Введи своё имя..." maxlength="20">
+    <!-- AUTH SCREEN -->
+    <div id="authScreen">
+        <div class="watermark">
+            <h1>Sicore</h1>
+            <p>Без блокировок и ограничений</p>
+        </div>
+
+        <div class="auth-container">
+            <div class="auth-tabs">
+                <div class="auth-tab active" onclick="switchAuthTab('login')">Вход</div>
+                <div class="auth-tab" onclick="switchAuthTab('register')">Регистрация</div>
             </div>
-            <button class="btn-primary" onclick="login()">Войти</button>
+
+            <!-- LOGIN FORM -->
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="input-field">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+
+                <div class="input-field">
+                    <label>Пароль</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+
+                <div class="checkbox-field">
+                    <input type="checkbox" id="rememberMe">
+                    <label for="rememberMe">Запомнить меня</label>
+                </div>
+
+                <button type="submit" class="btn-primary">Войти</button>
+
+                <div class="divider"><span>или</span></div>
+
+                <button type="button" class="btn-primary btn-google" onclick="loginWithGoogle()">
+                    <svg width="20" height="20" viewBox="0 0 20 20">
+                        <path fill="#4285F4" d="M19.6 10.23c0-.82-.1-1.42-.25-2.05H10v3.72h5.5c-.15.96-.74 2.31-2.04 3.22v2.45h3.16c1.89-1.73 2.98-4.3 2.98-7.34z"/>
+                        <path fill="#34A853" d="M13.46 15.13c-.83.59-1.96 1-3.46 1-2.64 0-4.88-1.74-5.68-4.15H1.07v2.52C2.72 17.75 6.09 20 10 20c2.7 0 4.96-.89 6.62-2.42l-3.16-2.45z"/>
+                        <path fill="#FBBC05" d="M3.99 10c0-.69.12-1.35.32-1.97V5.51H1.07A9.973 9.973 0 000 10c0 1.61.39 3.14 1.07 4.49l3.24-2.52c-.2-.62-.32-1.28-.32-1.97z"/>
+                        <path fill="#EA4335" d="M10 3.88c1.88 0 3.13.81 3.85 1.48l2.84-2.76C14.96.99 12.7 0 10 0 6.09 0 2.72 2.25 1.07 5.51l3.24 2.52C5.12 5.62 7.36 3.88 10 3.88z"/>
+                    </svg>
+                    Войти через Google
+                </button>
+            </form>
+
+            <!-- REGISTER FORM -->
+            <form id="registerForm" class="hidden" onsubmit="handleRegister(event)">
+                <div class="input-field">
+                    <label>Имя</label>
+                    <input type="text" id="registerName" required>
+                </div>
+
+                <div class="input-field">
+                    <label>Логин</label>
+                    <input type="text" id="registerLogin" required>
+                </div>
+
+                <div class="input-field">
+                    <label>Email</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+
+                <div class="input-field">
+                    <label>Пароль</label>
+                    <input type="password" id="registerPassword" required minlength="6">
+                </div>
+
+                <div class="input-field">
+                    <label>Повторите пароль</label>
+                    <input type="password" id="registerPasswordConfirm" required minlength="6">
+                </div>
+
+                <button type="submit" class="btn-primary">Зарегистрироваться</button>
+
+                <div class="divider"><span>или</span></div>
+
+                <button type="button" class="btn-primary btn-google" onclick="loginWithGoogle()">
+                    <svg width="20" height="20" viewBox="0 0 20 20">
+                        <path fill="#4285F4" d="M19.6 10.23c0-.82-.1-1.42-.25-2.05H10v3.72h5.5c-.15.96-.74 2.31-2.04 3.22v2.45h3.16c1.89-1.73 2.98-4.3 2.98-7.34z"/>
+                        <path fill="#34A853" d="M13.46 15.13c-.83.59-1.96 1-3.46 1-2.64 0-4.88-1.74-5.68-4.15H1.07v2.52C2.72 17.75 6.09 20 10 20c2.7 0 4.96-.89 6.62-2.42l-3.16-2.45z"/>
+                        <path fill="#FBBC05" d="M3.99 10c0-.69.12-1.35.32-1.97V5.51H1.07A9.973 9.973 0 000 10c0 1.61.39 3.14 1.07 4.49l3.24-2.52c-.2-.62-.32-1.28-.32-1.97z"/>
+                        <path fill="#EA4335" d="M10 3.88c1.88 0 3.13.81 3.85 1.48l2.84-2.76C14.96.99 12.7 0 10 0 6.09 0 2.72 2.25 1.07 5.51l3.24 2.52C5.12 5.62 7.36 3.88 10 3.88z"/>
+                    </svg>
+                    Регистрация через Google
+                </button>
+            </form>
         </div>
     </div>
 
     <!-- MAIN APP -->
     <div id="app">
-        <!-- SERVERS SIDEBAR -->
-        <div class="servers-sidebar" id="serversList">
-            <div class="server-icon active" data-server="default" onclick="switchServer('default')">
-                ☕
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2 id="sidebarTitle">Друзья</h2>
+                <button class="icon-btn" onclick="showCreateGroupModal()">+</button>
             </div>
-            <div class="server-icon" onclick="showCreateServerModal()">
-                +
-            </div>
-        </div>
 
-        <!-- CHANNELS SIDEBAR -->
-        <div class="channels-sidebar">
-            <div class="server-header" id="serverName">☕ Кофейня</div>
-            <div class="channels-list" id="channelsList">
-                <!-- Заполняется динамически -->
-            </div>
-            <div style="padding: 12px; border-top: 1px solid rgba(161, 136, 127, 0.1);">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <div class="member-avatar" id="userAvatar">
-                        <div class="status-indicator status-online"></div>
+            <div class="sidebar-content">
+                <!-- FRIENDS TAB -->
+                <div id="friendsTab">
+                    <div class="sidebar-section">
+                        <div class="section-title">Запросы в друзья (<span id="requestsCount">0</span>)</div>
+                        <div id="friendRequestsList"></div>
                     </div>
-                    <div>
-                        <div id="currentUsername" style="font-weight: 600; font-size: 14px;"></div>
-                        <div style="font-size: 12px; color: var(--accent);">онлайн</div>
+
+                    <div class="sidebar-section">
+                        <div class="section-title">Друзья (<span id="friendsCount">0</span>)</div>
+                        <div id="friendsList"></div>
                     </div>
-                    <button class="icon-btn" onclick="showSettings()" style="margin-left: auto;">⚙️</button>
+                </div>
+
+                <!-- GROUPS TAB -->
+                <div id="groupsTab" class="hidden">
+                    <div class="sidebar-section">
+                        <div class="section-title">Мои группы</div>
+                        <div id="groupsList"></div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- CHAT CONTAINER -->
-        <div class="chat-container">
-            <div class="chat-header">
-                <span style="font-size: 20px;">#</span>
-                <h2 id="currentChannelName">общий-чат</h2>
-            </div>
-            
-            <div id="voicePanel" style="display: none;" class="voice-panel">
-                <h3>🎤 Голосовой чат</h3>
-                <div id="voiceUsers" class="voice-users"></div>
-                <button class="btn-primary" onclick="leaveVoice()" style="margin-top: 16px; max-width: 200px;">Отключиться</button>
-            </div>
-
-            <div class="messages-area" id="messagesArea">
-                <!-- Сообщения -->
-            </div>
-
-            <div class="message-input-area">
-                <form class="message-input-wrapper" id="messageForm">
-                    <input type="text" id="messageInput" placeholder="Напиши сообщение...">
-                    <button type="submit" class="send-btn">Отправить</button>
-                </form>
+            <div class="user-panel">
+                <div class="avatar" id="userAvatar">
+                    <div class="status-dot online"></div>
+                </div>
+                <div class="friend-info" style="flex: 1;">
+                    <div class="friend-name" id="userName"></div>
+                    <div class="friend-status" id="userLogin"></div>
+                </div>
+                <button class="icon-btn" onclick="showSettings()">⚙️</button>
             </div>
         </div>
 
-        <!-- MEMBERS/FRIENDS SIDEBAR -->
-        <div class="members-sidebar">
-            <div class="members-section">
-                <div class="members-title">Друзья</div>
-                <button class="add-friend-btn" onclick="showAddFriendModal()">+ Добавить друга</button>
-                <div id="friendsList">
-                    <!-- Друзья -->
+        <!-- MAIN CONTENT -->
+        <div class="chat-area">
+            <!-- FRIENDS VIEW -->
+            <div id="friendsView">
+                <div class="friends-header">
+                    <div class="friends-tabs">
+                        <button class="friend-tab active" onclick="switchFriendTab('all')">Все</button>
+                        <button class="friend-tab" onclick="switchFriendTab('online')">Онлайн</button>
+                        <button class="friend-tab" onclick="switchFriendTab('offline')">Офлайн</button>
+                        <button class="friend-tab" onclick="switchFriendTab('add')">Добавить в друзья</button>
+                    </div>
+
+                    <div id="addFriendSection" class="add-friend-section hidden">
+                        <input type="text" id="addFriendInput" placeholder="Введите логин пользователя">
+                        <button class="btn-primary" style="width: auto; margin: 0;" onclick="sendFriendRequest()">Добавить</button>
+                    </div>
+                </div>
+
+                <div class="friends-list" id="friendsViewList">
+                    <!-- Друзья отображаются здесь -->
                 </div>
             </div>
-            <div class="members-section">
-                <div class="members-title">Участники сервера</div>
-                <div id="membersList">
-                    <!-- Участники -->
+
+            <!-- DM CHAT VIEW -->
+            <div id="dmChatView" class="hidden">
+                <div class="chat-header">
+                    <div class="chat-header-left">
+                        <div class="avatar" id="dmUserAvatar">
+                            <div class="status-dot"></div>
+                        </div>
+                        <div>
+                            <div class="friend-name" id="dmUserName"></div>
+                            <div class="friend-status" id="dmUserStatus"></div>
+                        </div>
+                    </div>
+
+                    <div class="chat-header-right">
+                        <button class="action-circle" onclick="startCall('audio')" title="Позвонить">📞</button>
+                        <button class="action-circle" onclick="startCall('video')" title="Видеозвонок">📹</button>
+                        <button class="action-circle" onclick="togglePinnedMessages()" title="Закрепленные">📌</button>
+                    </div>
+                </div>
+
+                <div class="pinned-banner" id="pinnedBanner">
+                    <span>📌</span>
+                    <span id="pinnedText">Закрепленные сообщения</span>
+                </div>
+
+                <div class="messages-container" id="dmMessages"></div>
+
+                <div class="message-input-container">
+                    <form class="message-input-wrap" id="dmMessageForm" onsubmit="sendDM(event)">
+                        <input type="text" id="dmMessageInput" placeholder="Напишите сообщение...">
+                        <button type="submit" class="send-btn">Отправить</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- GROUP CHAT VIEW -->
+            <div id="groupChatView" class="hidden">
+                <div class="chat-header">
+                    <div class="chat-header-left">
+                        <div class="avatar" id="groupAvatar"></div>
+                        <div>
+                            <div class="friend-name" id="groupName"></div>
+                            <div class="friend-status" id="groupMembersCount"></div>
+                        </div>
+                    </div>
+
+                    <div class="chat-header-right">
+                        <button class="action-circle" onclick="showGroupSettings()" title="Настройки группы">⚙️</button>
+                    </div>
+                </div>
+
+                <div class="messages-container" id="groupMessages"></div>
+
+                <div class="message-input-container">
+                    <form class="message-input-wrap" id="groupMessageForm" onsubmit="sendGroupMessage(event)">
+                        <input type="text" id="groupMessageInput" placeholder="Напишите сообщение...">
+                        <button type="submit" class="send-btn">Отправить</button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MODALS -->
-    <div id="addFriendModal" class="modal">
-        <div class="modal-content">
-            <h3>Добавить в друзья</h3>
-            <input type="text" id="friendUsernameInput" placeholder="Имя пользователя" class="input-group" style="width: 100%; padding: 12px; background: var(--coffee-dark); border: 1px solid var(--accent); border-radius: 8px; color: var(--cream); margin-bottom: 16px;">
-            <div style="display: flex; gap: 12px;">
-                <button class="btn-primary" onclick="addFriend()">Добавить</button>
-                <button class="btn-primary" onclick="closeModal('addFriendModal')" style="background: var(--coffee-dark);">Отмена</button>
+    <!-- CALL SCREEN -->
+    <div id="callScreen">
+        <div class="call-avatar" id="callAvatar"></div>
+        <div class="call-name" id="callName"></div>
+        <div class="call-controls">
+            <button class="call-control-btn camera" id="cameraBtn" onclick="toggleCamera()">📹</button>
+            <button class="call-control-btn screen" id="screenBtn" onclick="toggleScreenShare()">🖥️</button>
+            <button class="call-control-btn hangup" onclick="endCall()">📞</button>
+        </div>
+    </div>
+
+    <!-- INCOMING CALL MODAL -->
+    <div id="incomingCallModal" class="modal">
+        <div class="modal-content" style="text-align: center;">
+            <div class="call-avatar" id="incomingCallAvatar" style="margin: 0 auto 24px;"></div>
+            <h3 id="incomingCallName" style="margin-bottom: 32px;"></h3>
+            <div style="display: flex; gap: 24px; justify-content: center;">
+                <button class="action-circle green" style="width: 60px; height: 60px; font-size: 24px;" onclick="acceptCall()">📞</button>
+                <button class="action-circle red" style="width: 60px; height: 60px; font-size: 24px;" onclick="rejectCall()">📞</button>
             </div>
         </div>
     </div>
 
-    <div id="createServerModal" class="modal">
+    <!-- CREATE GROUP MODAL -->
+    <div id="createGroupModal" class="modal">
         <div class="modal-content">
-            <h3>Создать сервер</h3>
-            <input type="text" id="serverNameInput" placeholder="Название сервера" class="input-group" style="width: 100%; padding: 12px; background: var(--coffee-dark); border: 1px solid var(--accent); border-radius: 8px; color: var(--cream); margin-bottom: 16px;">
-            <div style="display: flex; gap: 12px;">
-                <button class="btn-primary" onclick="createServer()">Создать</button>
-                <button class="btn-primary" onclick="closeModal('createServerModal')" style="background: var(--coffee-dark);">Отмена</button>
+            <div class="modal-header">
+                <h3>Создать группу</h3>
+            </div>
+
+            <div class="modal-body">
+                <label class="avatar-upload" onclick="document.getElementById('groupAvatarInput').click()">
+                    <span id="groupAvatarPreview">📁</span>
+                    <input type="file" id="groupAvatarInput" accept="image/*" onchange="previewGroupAvatar(event)">
+                </label>
+
+                <div class="input-field">
+                    <label>Название группы</label>
+                    <input type="text" id="groupNameInput">
+                </div>
+
+                <div class="input-field">
+                    <label>Тип группы</label>
+                    <div class="radio-group">
+                        <label class="radio-option selected">
+                            <input type="radio" name="groupType" value="community" checked>
+                            <div>🌐 Сообщество</div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="groupType" value="gaming">
+                            <div>🎮 Для игр</div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="groupType" value="friends">
+                            <div>👥 Друзья</div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('createGroupModal')">Отмена</button>
+                <button class="btn-primary" style="width: auto; margin: 0;" onclick="createGroup()">Создать</button>
             </div>
         </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io();
-        let currentUser = null;
-        let currentServer = 'default';
-        let currentChannel = 'general';
-        let currentChannelType = 'text';
-        let friends = [];
-        let servers = [];
-        let inVoiceChannel = null;
-        let peerConnections = new Map();
-        let localStream = null;
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
 
-        // LOGIN
-        function login() {
-            const username = document.getElementById('usernameInput').value.trim();
-            if (username) {
-                socket.emit('register', username);
-                document.getElementById('currentUsername').textContent = username;
-                document.getElementById('userAvatar').textContent = username[0].toUpperCase();
-                currentUser = { username: username };
-            }
-        }
-
-        document.getElementById('usernameInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') login();
-        });
-
-        // SOCKET EVENTS
-        socket.on('init', (data) => {
-            currentUser = { ...currentUser, id: data.userId };
-            servers = data.servers;
-            friends = data.friends;
-            
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('app').style.display = 'grid';
-            
-            renderServers();
-            renderChannels();
-            renderFriends();
-        });
-
-        socket.on('new-message', (data) => {
-            if (data.channelId === currentChannel) {
-                addMessage(data.message);
-            }
-        });
-
-        socket.on('message-history', (data) => {
-            document.getElementById('messagesArea').innerHTML = '';
-            data.messages.forEach(msg => addMessage(msg));
-        });
-
-        socket.on('user-status', (data) => {
-            updateUserStatus(data);
-        });
-
-        socket.on('friend-added', (friend) => {
-            friends.push(friend);
-            renderFriends();
-        });
-
-        socket.on('notification', (message) => {
-            showNotification(message);
-        });
-
-        socket.on('server-created', (server) => {
-            servers.push(server);
-            renderServers();
-        });
-
-        socket.on('new-dm', (data) => {
-            // Обработка личных сообщений
-            if (currentChannel === 'dm-' + data.recipientId) {
-                addMessage(data.message, true);
-            }
-        });
-
-        socket.on('user-joined-voice', (data) => {
-            if (data.channelId === inVoiceChannel) {
-                renderVoiceUsers(data.users);
-                
-                // Создаем WebRTC соединение с новым пользователем
-                if (data.userId !== currentUser.id) {
-                    createPeerConnection(data.userId);
-                }
-            }
-        });
-
-        socket.on('user-left-voice', (data) => {
-            if (data.channelId === inVoiceChannel) {
-                if (peerConnections.has(data.userId)) {
-                    peerConnections.get(data.userId).close();
-                    peerConnections.delete(data.userId);
-                }
-            }
-        });
-
-        socket.on('voice-offer', async (data) => {
-            const pc = createPeerConnection(data.from);
-            await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-            const answer = await pc.createAnswer();
-            await pc.setLocalDescription(answer);
-            socket.emit('voice-answer', { to: data.from, answer: answer });
-        });
-
-        socket.on('voice-answer', async (data) => {
-            const pc = peerConnections.get(data.from);
-            if (pc) {
-                await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
-            }
-        });
-
-        socket.on('ice-candidate', async (data) => {
-            const pc = peerConnections.get(data.from);
-            if (pc) {
-                await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
-            }
-        });
-
-        // SEND MESSAGE
-        document.getElementById('messageForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const input = document.getElementById('messageInput');
-            const message = input.value.trim();
-            
-            if (message) {
-                if (currentChannel.startsWith('dm-')) {
-                    const recipientId = currentChannel.replace('dm-', '');
-                    socket.emit('send-dm', { recipientId: recipientId, message: message });
-                } else {
-                    socket.emit('send-message', { channelId: currentChannel, message: message });
-                }
-                input.value = '';
-            }
-        });
-
-        // ADD MESSAGE TO UI
-        function addMessage(msg, isDM = false) {
-            const messagesArea = document.getElementById('messagesArea');
-            const messageEl = document.createElement('div');
-            messageEl.className = 'message';
-            
-            const username = isDM ? msg.fromName : msg.username;
-            const avatar = username[0].toUpperCase();
-            
-            messageEl.innerHTML = `
-                <div class="message-avatar">${avatar}</div>
-                <div class="message-content">
-                    <div class="message-header">
-                        <span class="message-username">${username}</span>
-                        <span class="message-time">${msg.time}</span>
-                    </div>
-                    <div class="message-text">${escapeHtml(msg.message)}</div>
-                </div>
-            `;
-            
-            messagesArea.appendChild(messageEl);
-            messagesArea.scrollTop = messagesArea.scrollHeight;
-        }
-
-        // RENDER FUNCTIONS
-        function renderServers() {
-            const serversList = document.getElementById('serversList');
-            serversList.innerHTML = '';
-            
-            servers.forEach(server => {
-                const icon = document.createElement('div');
-                icon.className = 'server-icon';
-                if (server.id === currentServer) icon.classList.add('active');
-                icon.setAttribute('data-server', server.id);
-                icon.textContent = server.name[0];
-                icon.onclick = () => switchServer(server.id);
-                serversList.appendChild(icon);
-            });
-            
-            const addBtn = document.createElement('div');
-            addBtn.className = 'server-icon';
-            addBtn.textContent = '+';
-            addBtn.onclick = showCreateServerModal;
-            serversList.appendChild(addBtn);
-        }
-
-        function renderChannels() {
-            const server = servers.find(s => s.id === currentServer);
-            if (!server) return;
-            
-            document.getElementById('serverName').textContent = server.name;
-            
-            const channelsList = document.getElementById('channelsList');
-            channelsList.innerHTML = '';
-            
-            // Текстовые каналы
-            const textCategory = document.createElement('div');
-            textCategory.className = 'channel-category';
-            textCategory.innerHTML = '<div class="category-title">Текстовые каналы</div>';
-            
-            server.channels.filter(ch => ch.type === 'text').forEach(channel => {
-                const item = document.createElement('div');
-                item.className = 'channel-item';
-                if (channel.id === currentChannel) item.classList.add('active');
-                item.innerHTML = `<span>#</span> ${channel.name}`;
-                item.onclick = () => switchChannel(channel.id, 'text');
-                textCategory.appendChild(item);
-            });
-            
-            channelsList.appendChild(textCategory);
-            
-            // Голосовые каналы
-            const voiceCategory = document.createElement('div');
-            voiceCategory.className = 'channel-category';
-            voiceCategory.innerHTML = '<div class="category-title">Голосовые каналы</div>';
-            
-            server.channels.filter(ch => ch.type === 'voice').forEach(channel => {
-                const item = document.createElement('div');
-                item.className = 'channel-item';
-                item.innerHTML = `<span>🔊</span> ${channel.name}`;
-                item.onclick = () => joinVoiceChannel(channel.id);
-                voiceCategory.appendChild(item);
-            });
-            
-            channelsList.appendChild(voiceCategory);
-        }
-
-        function renderFriends() {
-            const friendsList = document.getElementById('friendsList');
-            friendsList.innerHTML = '';
-            
-            friends.forEach(friend => {
-                const item = document.createElement('div');
-                item.className = 'member-item';
-                item.innerHTML = `
-                    <div class="member-avatar">
-                        ${friend.username[0].toUpperCase()}
-                        <div class="status-indicator status-${friend.status}"></div>
-                    </div>
-                    <div class="member-name">${friend.username}</div>
-                `;
-                item.onclick = () => openDM(friend);
-                friendsList.appendChild(item);
-            });
-        }
-
-        // VOICE CHAT
-        async function joinVoiceChannel(channelId) {
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                inVoiceChannel = channelId;
-                
-                document.getElementById('voicePanel').style.display = 'block';
-                document.getElementById('messagesArea').style.display = 'none';
-                document.getElementById('messageForm').parentElement.style.display = 'none';
-                
-                socket.emit('join-voice', channelId);
-                
-                showNotification('🎤 Подключено к голосовому чату');
-            } catch (error) {
-                showNotification('❌ Не удалось получить доступ к микрофону');
-                console.error(error);
-            }
-        }
-
-        function leaveVoice() {
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-                localStream = null;
-            }
-            
-            peerConnections.forEach(pc => pc.close());
-            peerConnections.clear();
-            
-            if (inVoiceChannel) {
-                socket.emit('leave-voice', inVoiceChannel);
-            }
-            
-            inVoiceChannel = null;
-            document.getElementById('voicePanel').style.display = 'none';
-            document.getElementById('messagesArea').style.display = 'flex';
-            document.getElementById('messageForm').parentElement.style.display = 'block';
-        }
-
-        function createPeerConnection(userId) {
-            const pc = new RTCPeerConnection({
-                iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-            });
-            
-            localStream.getTracks().forEach(track => {
-                pc.addTrack(track, localStream);
-            });
-            
-            pc.ontrack = (event) => {
-                const audio = new Audio();
-                audio.srcObject = event.streams[0];
-                audio.play();
-            };
-            
-            pc.onicecandidate = (event) => {
-                if (event.candidate) {
-                    socket.emit('ice-candidate', {
-                        to: userId,
-                        candidate: event.candidate
-                    });
-                }
-            };
-            
-            peerConnections.set(userId, pc);
-            
-            // Создаем offer
-            pc.createOffer().then(offer => {
-                pc.setLocalDescription(offer);
-                socket.emit('voice-offer', { to: userId, offer: offer });
-            });
-            
-            return pc;
-        }
-
-        function renderVoiceUsers(users) {
-            const voiceUsers = document.getElementById('voiceUsers');
-            voiceUsers.innerHTML = '';
-            
-            users.forEach(user => {
-                const userEl = document.createElement('div');
-                userEl.className = 'voice-user';
-                userEl.innerHTML = `
-                    <div class="voice-user-avatar">${user.username[0].toUpperCase()}</div>
-                    <div style="font-size: 12px;">${user.username}</div>
-                `;
-                voiceUsers.appendChild(userEl);
-            });
-        }
-
-        // SWITCH FUNCTIONS
-        function switchServer(serverId) {
-            currentServer = serverId;
-            const server = servers.find(s => s.id === serverId);
-            if (server && server.channels.length > 0) {
-                const firstTextChannel = server.channels.find(ch => ch.type === 'text');
-                if (firstTextChannel) {
-                    switchChannel(firstTextChannel.id, 'text');
-                }
-            }
-            renderServers();
-            renderChannels();
-        }
-
-        function switchChannel(channelId, type) {
-            currentChannel = channelId;
-            currentChannelType = type;
-            
-            const server = servers.find(s => s.id === currentServer);
-            const channel = server.channels.find(ch => ch.id === channelId);
-            
-            document.getElementById('currentChannelName').textContent = channel.name;
-            document.getElementById('messagesArea').innerHTML = '';
-            
-            socket.emit('get-channel-messages', channelId);
-            renderChannels();
-        }
-
-        function openDM(friend) {
-            currentChannel = 'dm-' + friend.id;
-            document.getElementById('currentChannelName').textContent = '@ ' + friend.username;
-            document.getElementById('messagesArea').innerHTML = '';
-            socket.emit('get-dm-history', friend.id);
-        }
-
-        // MODALS
-        function showAddFriendModal() {
-            document.getElementById('addFriendModal').classList.add('active');
-        }
-
-        function showCreateServerModal() {
-            document.getElementById('createServerModal').classList.add('active');
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-
-        function addFriend() {
-            const username = document.getElementById('friendUsernameInput').value.trim();
-            if (username) {
-                socket.emit('add-friend', username);
-                document.getElementById('friendUsernameInput').value = '';
-                closeModal('addFriendModal');
-            }
-        }
-
-        function createServer() {
-            const name = document.getElementById('serverNameInput').value.trim();
-            if (name) {
-                socket.emit('create-server', name);
-                document.getElementById('serverNameInput').value = '';
-                closeModal('createServerModal');
-            }
-        }
-
-        // UTILS
-        function showNotification(message) {
-            const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        function updateUserStatus(data) {
-            // Обновление статусов в UI
-            renderFriends();
-        }
-
-        function showSettings() {
-            showNotification('⚙️ Настройки (в разработке)');
-        }
-    </script>
-</body>
-</html>
+Продолжение кода в следующем сообщении из-за ограничения длины...
