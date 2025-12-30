@@ -1,6 +1,6 @@
 {
   "name": "sicore",
-  "version": "3.0.0",
+  "version": "1.0.0",
   "description": "Sicore",
   "main": "server.js",
   "scripts": {
@@ -13,3 +13,4 @@
     "express-session": "^1.17.3"
   }
 }
+
