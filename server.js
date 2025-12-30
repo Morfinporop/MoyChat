@@ -8,21 +8,8 @@ const io = require('socket.io')(http, {
   }
 });
 
-// ==================== SMS PROVIDER SETUP ====================
-// Выберите один из сервисов:
-
-// 1. SMSC.RU (Россия)
 const axios = require('axios');
-const SMSC_LOGIN = 'your_login';  // Замените на ваш логин
-const SMSC_PASSWORD = 'your_password';  // Замените на ваш пароль
-
-// 2. SMS.RU (Россия)
-const SMSRU_API_KEY = '4C35F484-3D28-97BB-0359-D16DDC5EB1F2';  // Замените на ваш API ключ
-
-// 3. TWILIO (Международный)
-const TWILIO_ACCOUNT_SID = 'your_account_sid';
-const TWILIO_AUTH_TOKEN = 'your_auth_token';
-const TWILIO_PHONE = 'your_twilio_phone';
+const SMSRU_API_KEY = '646BAEF4-CCE6-01B5-6668-1D27927CC045';
 
 app.use(express.static(__dirname));
 app.use(express.json());
@@ -31,34 +18,11 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
-// Database
 let users = new Map();
 let chats = new Map();
 let messages = new Map();
-let smsCodes = new Map(); // phone -> {code, expires}
+let smsCodes = new Map();
 
-// ==================== SMS API ====================
-
-// ВАРИАНТ 1: SMSC.RU
-async function sendSMS_SMSC(phone, code) {
-    try {
-        const response = await axios.get('https://smsc.ru/sys/send.php', {
-            params: {
-                login: SMSC_LOGIN,
-                psw: SMSC_PASSWORD,
-                phones: phone,
-                mes: `Ваш код для входа в Sicore: ${code}`,
-                charset: 'utf-8'
-            }
-        });
-        return response.data.error ? false : true;
-    } catch (error) {
-        console.error('SMSC Error:', error);
-        return false;
-    }
-}
-
-// ВАРИАНТ 2: SMS.RU
 async function sendSMS_SMSRU(phone, code) {
     try {
         const response = await axios.get('https://sms.ru/sms/send', {
@@ -76,29 +40,10 @@ async function sendSMS_SMSRU(phone, code) {
     }
 }
 
-// ВАРИАНТ 3: TWILIO
-const twilio = require('twilio');
-async function sendSMS_TWILIO(phone, code) {
-    try {
-        const client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
-        await client.messages.create({
-            body: `Ваш код для входа в Sicore: ${code}`,
-            from: TWILIO_PHONE,
-            to: phone
-        });
-        return true;
-    } catch (error) {
-        console.error('Twilio Error:', error);
-        return false;
-    }
-}
-
-// Generate 4-digit code
 function generateCode() {
     return Math.floor(1000 + Math.random() * 9000).toString();
 }
 
-// Send SMS endpoint
 app.post('/api/send-sms', async (req, res) => {
     const { phone } = req.body;
 
@@ -108,18 +53,11 @@ app.post('/api/send-sms', async (req, res) => {
 
     const code = generateCode();
     
-    // Save code with 5 min expiration
     smsCodes.set(phone, {
         code: code,
         expires: Date.now() + 5 * 60 * 1000
     });
 
-    // Выберите нужный сервис:
-    // const sent = await sendSMS_SMSC(phone, code);
-    // const sent = await sendSMS_SMSRU(phone, code);
-    // const sent = await sendSMS_TWILIO(phone, code);
-
-    // ДЛЯ ТЕСТИРОВАНИЯ (убрать в продакшене):
     console.log(`📱 SMS код для ${phone}: ${code}`);
     const sent = true;
 
@@ -130,7 +68,6 @@ app.post('/api/send-sms', async (req, res) => {
     }
 });
 
-// Verify SMS code
 app.post('/api/verify-sms', (req, res) => {
     const { phone, code } = req.body;
 
@@ -151,7 +88,6 @@ app.post('/api/verify-sms', (req, res) => {
 
     smsCodes.delete(phone);
 
-    // Check if user exists
     let existingUser = null;
     for (let [id, user] of users.entries()) {
         if (user.phone === phone) {
@@ -166,21 +102,22 @@ app.post('/api/verify-sms', (req, res) => {
     });
 });
 
-// ==================== SOCKET ====================
 io.on('connection', (socket) => {
-    console.log('🟢 User connected:', socket.id);
+    console.log('🟢 Connected:', socket.id);
 
     socket.on('register', (data) => {
         const userId = socket.id;
         const user = {
             id: userId,
             name: data.name,
+            lastname: data.lastname,
             phone: data.phone,
             avatar: null,
             bio: '',
             status: 'online',
             socketId: socket.id,
-            lastSeen: Date.now()
+            lastSeen: Date.now(),
+            twoFactorAuth: data.twoFactorAuth || false
         };
         
         users.set(userId, user);
@@ -199,6 +136,7 @@ io.on('connection', (socket) => {
                     avatar: otherUser?.avatar,
                     lastMessage: chat.lastMessage,
                     lastMessageTime: chat.lastMessageTime,
+                    background: chat.background,
                     unread: 0,
                     messages: messages.get(chat.id) || []
                 };
@@ -244,6 +182,7 @@ io.on('connection', (socket) => {
                         avatar: otherUser?.avatar,
                         lastMessage: chat.lastMessage,
                         lastMessageTime: chat.lastMessageTime,
+                        background: chat.background,
                         messages: messages.get(chat.id) || []
                     };
                 });
@@ -252,6 +191,11 @@ io.on('connection', (socket) => {
                 user: user,
                 chats: userChats,
                 users: allUsers
+            });
+
+            socket.broadcast.emit('user-status', {
+                userId: user.id,
+                status: 'online'
             });
         }
     });
@@ -263,7 +207,8 @@ io.on('connection', (socket) => {
         const message = {
             id: Date.now(),
             from: user.id,
-            text: data.text,
+            text: data.text || null,
+            image: data.image || null,
             timestamp: Date.now()
         };
 
@@ -274,7 +219,7 @@ io.on('connection', (socket) => {
 
         const chat = chats.get(data.chatId);
         if (chat) {
-            chat.lastMessage = data.text;
+            chat.lastMessage = data.text || 'Изображение';
             chat.lastMessageTime = Date.now();
 
             chat.participants.forEach(participantId => {
@@ -311,6 +256,7 @@ io.on('connection', (socket) => {
                 avatar: targetUser.avatar,
                 lastMessage: existingChat.lastMessage,
                 lastMessageTime: existingChat.lastMessageTime,
+                background: existingChat.background,
                 messages: messages.get(existingChat.id) || []
             });
             return;
@@ -322,7 +268,8 @@ io.on('connection', (socket) => {
             participants: [currentUser.id, targetUser.id],
             createdAt: Date.now(),
             lastMessage: null,
-            lastMessageTime: null
+            lastMessageTime: null,
+            background: null
         };
 
         chats.set(chatId, newChat);
@@ -337,6 +284,7 @@ io.on('connection', (socket) => {
                 avatar: otherUser.avatar,
                 lastMessage: null,
                 lastMessageTime: null,
+                background: null,
                 messages: []
             });
         });
@@ -366,6 +314,13 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('toggle-2fa', (enabled) => {
+        const user = users.get(socket.id);
+        if (user) {
+            user.twoFactorAuth = enabled;
+        }
+    });
+
     socket.on('disconnect', () => {
         const user = users.get(socket.id);
         if (user) {
@@ -377,7 +332,7 @@ io.on('connection', (socket) => {
                 status: 'offline'
             });
         }
-        console.log('🔴 User disconnected:', socket.id);
+        console.log('🔴 Disconnected:', socket.id);
     });
 });
 
