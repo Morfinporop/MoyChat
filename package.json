@@ -1,7 +1,7 @@
 {
-  "name": "sicore-chat",
-  "version": "2.0.0",
-  "description": "Sicore - Без блокировок и ограничений",
+  "name": "sicore-messenger",
+  "version": "1.0.0",
+  "description": "Sicore - Безопасный мессенджер",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "express": "^4.18.2",
-    "socket.io": "^4.6.1"
+    "socket.io": "^4.6.1",
+    "axios": "^1.6.0",
+    "twilio": "^4.19.0"
   }
 }
