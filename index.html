@@ -791,6 +791,7 @@
                 height: 100vh;
                 z-index: 100;
                 transition: left 0.3s;
+                width: 280px;
             }
 
             .sidebar.open {
@@ -803,7 +804,17 @@
             }
 
             .watermark {
-                display: none;
+                font-size: 60px !important;
+                right: 50%;
+                transform: translateX(50%) translateY(-50%) rotate(-15deg);
+            }
+
+            .watermark h1 {
+                font-size: 60px;
+            }
+
+            .watermark p {
+                font-size: 16px;
             }
         }
 
@@ -894,6 +905,26 @@
             border-color: var(--accent);
             background: rgba(161, 136, 127, 0.2);
         }
+
+        .error-message {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid var(--red);
+            color: var(--cream);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .success-message {
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px solid var(--green);
+            color: var(--cream);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -909,6 +940,9 @@
                 <div class="auth-tab active" onclick="switchAuthTab('login')">Вход</div>
                 <div class="auth-tab" onclick="switchAuthTab('register')">Регистрация</div>
             </div>
+
+            <div id="authError" class="error-message hidden"></div>
+            <div id="authSuccess" class="success-message hidden"></div>
 
             <!-- LOGIN FORM -->
             <form id="loginForm" onsubmit="handleLogin(event)">
@@ -1048,9 +1082,7 @@
                     </div>
                 </div>
 
-                <div class="friends-list" id="friendsViewList">
-                    <!-- Друзья отображаются здесь -->
-                </div>
+                <div class="friends-list" id="friendsViewList"></div>
             </div>
 
             <!-- DM CHAT VIEW -->
@@ -1082,7 +1114,7 @@
 
                 <div class="message-input-container">
                     <form class="message-input-wrap" id="dmMessageForm" onsubmit="sendDM(event)">
-                        <input type="text" id="dmMessageInput" placeholder="Напишите сообщение...">
+                        <input type="text" id="dmMessageInput" placeholder="Напишите сообщение..." autocomplete="off">
                         <button type="submit" class="send-btn">Отправить</button>
                     </form>
                 </div>
@@ -1108,7 +1140,7 @@
 
                 <div class="message-input-container">
                     <form class="message-input-wrap" id="groupMessageForm" onsubmit="sendGroupMessage(event)">
-                        <input type="text" id="groupMessageInput" placeholder="Напишите сообщение...">
+                        <input type="text" id="groupMessageInput" placeholder="Напишите сообщение..." autocomplete="off">
                         <button type="submit" class="send-btn">Отправить</button>
                     </form>
                 </div>
@@ -1125,6 +1157,8 @@
             <button class="call-control-btn screen" id="screenBtn" onclick="toggleScreenShare()">🖥️</button>
             <button class="call-control-btn hangup" onclick="endCall()">📞</button>
         </div>
+        <video id="localVideo" style="display:none;" autoplay muted></video>
+        <video id="remoteVideo" style="display:none;" autoplay></video>
     </div>
 
     <!-- INCOMING CALL MODAL -->
@@ -1160,15 +1194,15 @@
                 <div class="input-field">
                     <label>Тип группы</label>
                     <div class="radio-group">
-                        <label class="radio-option selected">
+                        <label class="radio-option selected" onclick="selectGroupType(this, 'community')">
                             <input type="radio" name="groupType" value="community" checked>
                             <div>🌐 Сообщество</div>
                         </label>
-                        <label class="radio-option">
+                        <label class="radio-option" onclick="selectGroupType(this, 'gaming')">
                             <input type="radio" name="groupType" value="gaming">
                             <div>🎮 Для игр</div>
                         </label>
-                        <label class="radio-option">
+                        <label class="radio-option" onclick="selectGroupType(this, 'friends')">
                             <input type="radio" name="groupType" value="friends">
                             <div>👥 Друзья</div>
                         </label>
@@ -1183,8 +1217,756 @@
         </div>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <!-- SETTINGS MODAL -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Настройки</h3>
+            </div>
 
-Продолжение кода в следующем сообщении из-за ограничения длины...
+            <div class="modal-body">
+                <div class="input-field">
+                    <label>Профиль и приватность</label>
+                    <p style="color: var(--accent); font-size: 14px; margin-top: 8px;">Управление профилем и настройками приватности</p>
+                </div>
+
+                <div class="input-field">
+                    <label>Уведомления</label>
+                    <p style="color: var(--accent); font-size: 14px; margin-top: 8px;">Настройка звуков и уведомлений</p>
+                </div>
+
+                <div class="input-field">
+                    <label>Голос и видео</label>
+                    <p style="color: var(--accent); font-size: 14px; margin-top: 8px;">Настройка микрофона и камеры</p>
+                </div>
+
+                <div class="input-field">
+                    <button class="btn-primary" onclick="logout()">Выйти из аккаунта</button>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('settingsModal')">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
+        const socket = io();
+        let currentUser = null;
+        let currentView = 'friends';
+        let currentChat = null;
+        let currentChatType = null; // 'dm' or 'group'
+        let friends = [];
+        let friendRequests = [];
+        let groups = [];
+        let incomingCallData = null;
+        let currentCall = null;
+        let localStream = null;
+        let remoteStream = null;
+        let peerConnection = null;
+
+        // АВТОРИЗАЦИЯ
+        function switchAuthTab(tab) {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const tabs = document.querySelectorAll('.auth-tab');
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            
+            if (tab === 'login') {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                tabs[0].classList.add('active');
+            } else {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                tabs[1].classList.add('active');
+            }
+            
+            hideAuthMessages();
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const remember = document.getElementById('rememberMe').checked;
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, remember })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentUser = data.user;
+                    initApp();
+                } else {
+                    showAuthError(data.error);
+                }
+            } catch (error) {
+                showAuthError('Ошибка подключения к серверу');
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('registerName').value;
+            const login = document.getElementById('registerLogin').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+            
+            if (password !== passwordConfirm) {
+                showAuthError('Пароли не совпадают');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, login, email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentUser = data.user;
+                    initApp();
+                } else {
+                    showAuthError(data.error);
+                }
+            } catch (error) {
+                showAuthError('Ошибка подключения к серверу');
+            }
+        }
+
+        function loginWithGoogle() {
+            alert('Вход через Google:\n\nДля настройки входа через Google нужно:\n1. Создать проект в Google Cloud Console\n2. Включить Google Sign-In API\n3. Получить Client ID\n4. Добавить Firebase в проект\n\nПока используйте обычную регистрацию!');
+        }
+
+        function showAuthError(message) {
+            const errorDiv = document.getElementById('authError');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+            setTimeout(() => errorDiv.classList.add('hidden'), 5000);
+        }
+
+        function showAuthSuccess(message) {
+            const successDiv = document.getElementById('authSuccess');
+            successDiv.textContent = message;
+            successDiv.classList.remove('hidden');
+            setTimeout(() => successDiv.classList.add('hidden'), 5000);
+        }
+
+        function hideAuthMessages() {
+            document.getElementById('authError').classList.add('hidden');
+            document.getElementById('authSuccess').classList.add('hidden');
+        }
+
+        async function logout() {
+            await fetch('/api/logout', { method: 'POST' });
+            location.reload();
+        }
+
+        // ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
+        function initApp() {
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('app').style.display = 'grid';
+            
+            // Устанавливаем данные пользователя
+            document.getElementById('userName').textContent = currentUser.name;
+            document.getElementById('userLogin').textContent = '@' + currentUser.login;
+            document.getElementById('userAvatar').textContent = currentUser.avatar;
+            
+            // Инициализируем сокет
+            socket.emit('init-user', currentUser.email);
+            
+            // Показываем начальный вид
+            showFriendsView();
+        }
+
+        // SOCKET СОБЫТИЯ
+        socket.on('user-data', (data) => {
+            friends = data.friends;
+            friendRequests = data.friendRequests;
+            groups = data.groups;
+            
+            renderFriends();
+            renderFriendRequests();
+            renderGroups();
+        });
+
+        socket.on('new-friend-request', (requester) => {
+            friendRequests.push(requester);
+            renderFriendRequests();
+        });
+
+        socket.on('friend-added', (friend) => {
+            friends.push(friend);
+            renderFriends();
+        });
+
+        socket.on('friend-accepted', (friend) => {
+            friendRequests = friendRequests.filter(f => f.email !== friend.email);
+            friends.push(friend);
+            renderFriendRequests();
+            renderFriends();
+        });
+
+        socket.on('friend-request-removed', (email) => {
+            friendRequests = friendRequests.filter(f => f.email !== email);
+            renderFriendRequests();
+        });
+
+        socket.on('friend-status', (data) => {
+            const friend = friends.find(f => f.email === data.email);
+            if (friend) {
+                friend.status = data.status;
+                renderFriends();
+            }
+        });
+
+        socket.on('new-dm', (data) => {
+            if (currentChatType === 'dm' && currentChat === data.recipientEmail) {
+                addMessageToChat(data.message);
+            }
+        });
+
+        socket.on('dm-history', (data) => {
+            if (currentChatType === 'dm' && currentChat === data.recipientEmail) {
+                const container = document.getElementById('dmMessages');
+                container.innerHTML = '';
+                data.messages.forEach(msg => addMessageToChat(msg));
+            }
+        });
+
+        socket.on('group-created', (group) => {
+            groups.push(group);
+            renderGroups();
+        });
+
+        socket.on('new-group-message', (data) => {
+            if (currentChatType === 'group' && currentChat === data.channelId) {
+                addMessageToChat(data.message);
+            }
+        });
+
+        socket.on('incoming-call', (data) => {
+            incomingCallData = data;
+            showIncomingCall(data);
+        });
+
+        socket.on('call-answered', (data) => {
+            if (peerConnection) {
+                peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+            }
+        });
+
+        socket.on('ice-candidate', async (data) => {
+            if (peerConnection) {
+                await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+            }
+        });
+
+        socket.on('call-ended', () => {
+            endCall();
+        });
+
+        // РЕНДЕРИНГ
+        function renderFriends() {
+            const container = document.getElementById('friendsList');
+            const count = document.getElementById('friendsCount');
+            
+            container.innerHTML = '';
+            count.textContent = friends.length;
+            
+            friends.forEach(friend => {
+                const div = document.createElement('div');
+                div.className = 'friend-item';
+                div.onclick = () => openDM(friend);
+                
+                div.innerHTML = `
+                    <div class="avatar">
+                        ${friend.avatar}
+                        <div class="status-dot ${friend.status}"></div>
+                    </div>
+                    <div class="friend-info">
+                        <div class="friend-name">${friend.name}</div>
+                        <div class="friend-status">${friend.status === 'online' ? 'В сети' : 'Не в сети'}</div>
+                    </div>
+                `;
+                
+                container.appendChild(div);
+            });
+        }
+
+        function renderFriendRequests() {
+            const container = document.getElementById('friendRequestsList');
+            const count = document.getElementById('requestsCount');
+            
+            container.innerHTML = '';
+            count.textContent = friendRequests.length;
+            
+            friendRequests.forEach(request => {
+                const div = document.createElement('div');
+                div.className = 'friend-request-item';
+                
+                div.innerHTML = `
+                    <div class="avatar">${request.avatar}</div>
+                    <div class="friend-request-info">
+                        <div class="friend-request-name">${request.name}</div>
+                        <div class="friend-request-login">@${request.login}</div>
+                    </div>
+                    <div class="friend-request-actions">
+                        <button class="action-circle green" onclick="acceptFriendRequest('${request.email}')">✓</button>
+                        <button class="action-circle red" onclick="rejectFriendRequest('${request.email}')">✕</button>
+                    </div>
+                `;
+                
+                container.appendChild(div);
+            });
+        }
+
+        function renderGroups() {
+            const container = document.getElementById('groupsList');
+            container.innerHTML = '';
+            
+            groups.forEach(group => {
+                const div = document.createElement('div');
+                div.className = 'group-item';
+                div.onclick = () => openGroup(group);
+                
+                div.innerHTML = `
+                    <div class="avatar">${group.avatar}</div>
+                    <div class="friend-info">
+                        <div class="friend-name">${group.name}</div>
+                        <div class="friend-status">${group.members.length} участников</div>
+                    </div>
+                `;
+                
+                container.appendChild(div);
+            });
+        }
+
+        // ДРУЗЬЯ
+        function switchFriendTab(tab) {
+            const tabs = document.querySelectorAll('.friend-tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const addSection = document.getElementById('addFriendSection');
+            
+            if (tab === 'add') {
+                addSection.classList.remove('hidden');
+            } else {
+                addSection.classList.add('hidden');
+            }
+            
+            // Фильтрация друзей
+            const list = document.getElementById('friendsViewList');
+            list.innerHTML = '';
+            
+            let filteredFriends = friends;
+            
+            if (tab === 'online') {
+                filteredFriends = friends.filter(f => f.status === 'online');
+            } else if (tab === 'offline') {
+                filteredFriends = friends.filter(f => f.status === 'offline');
+            }
+            
+            filteredFriends.forEach(friend => {
+                const div = document.createElement('div');
+                div.className = 'friend-item';
+                div.onclick = () => openDM(friend);
+                
+                div.innerHTML = `
+                    <div class="avatar">
+                        ${friend.avatar}
+                        <div class="status-dot ${friend.status}"></div>
+                    </div>
+                    <div class="friend-info">
+                        <div class="friend-name">${friend.name}</div>
+                        <div class="friend-status">${friend.status === 'online' ? 'В сети' : 'Не в сети'}</div>
+                    </div>
+                `;
+                
+                list.appendChild(div);
+            });
+        }
+
+        function sendFriendRequest() {
+            const login = document.getElementById('addFriendInput').value.trim();
+            if (login) {
+                socket.emit('send-friend-request', login);
+                document.getElementById('addFriendInput').value = '';
+            }
+        }
+
+        function acceptFriendRequest(email) {
+            socket.emit('accept-friend-request', email);
+        }
+
+        function rejectFriendRequest(email) {
+            socket.emit('reject-friend-request', email);
+        }
+
+        // ЧАТ
+        function showFriendsView() {
+            document.getElementById('friendsView').classList.remove('hidden');
+            document.getElementById('dmChatView').classList.add('hidden');
+            document.getElementById('groupChatView').classList.add('hidden');
+            
+            currentView = 'friends';
+            currentChat = null;
+            currentChatType = null;
+            
+            switchFriendTab('all');
+        }
+
+        function openDM(friend) {
+            currentChat = friend.email;
+            currentChatType = 'dm';
+            
+            document.getElementById('friendsView').classList.add('hidden');
+            document.getElementById('dmChatView').classList.remove('hidden');
+            document.getElementById('groupChatView').classList.add('hidden');
+            
+            document.getElementById('dmUserName').textContent = friend.name;
+            document.getElementById('dmUserStatus').textContent = friend.status === 'online' ? 'В сети' : 'Не в сети';
+            document.getElementById('dmUserAvatar').textContent = friend.avatar;
+            document.querySelector('#dmUserAvatar .status-dot').className = `status-dot ${friend.status}`;
+            
+            document.getElementById('dmMessages').innerHTML = '';
+            socket.emit('get-dm-history', friend.email);
+        }
+
+        function openGroup(group) {
+            currentChat = group.channels[0].id;
+            currentChatType = 'group';
+            
+            document.getElementById('friendsView').classList.add('hidden');
+            document.getElementById('dmChatView').classList.add('hidden');
+            document.getElementById('groupChatView').classList.remove('hidden');
+            
+            document.getElementById('groupName').textContent = group.name;
+            document.getElementById('groupMembersCount').textContent = `${group.members.length} участников`;
+            document.getElementById('groupAvatar').textContent = group.avatar;
+            
+            document.getElementById('groupMessages').innerHTML = '';
+        }
+
+        function sendDM(e) {
+            e.preventDefault();
+            const input = document.getElementById('dmMessageInput');
+            const message = input.value.trim();
+            
+            if (message && currentChat) {
+                socket.emit('send-dm', {
+                    recipientEmail: currentChat,
+                    message: message
+                });
+                input.value = '';
+            }
+        }
+
+        function sendGroupMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('groupMessageInput');
+            const message = input.value.trim();
+            
+            if (message && currentChat) {
+                socket.emit('send-group-message', {
+                    channelId: currentChat,
+                    groupId: currentChat.split('_')[0] + '_' + currentChat.split('_')[1],
+                    message: message
+                });
+                input.value = '';
+            }
+        }
+
+        function addMessageToChat(msg) {
+            const container = currentChatType === 'dm' 
+                ? document.getElementById('dmMessages')
+                : document.getElementById('groupMessages');
+            
+            const div = document.createElement('div');
+            div.className = 'message-item';
+            div.dataset.messageId = msg.id;
+            
+            const isCurrentUser = msg.from === currentUser.email || msg.fromName === currentUser.name;
+            
+            div.innerHTML = `
+                <div class="avatar">${msg.fromAvatar}</div>
+                <div class="message-content-wrap">
+                    <div class="message-header">
+                        <span class="message-author">${msg.fromName}</span>
+                        <span class="message-time">${msg.time}</span>
+                    </div>
+                    <div class="message-text">${escapeHtml(msg.message)}</div>
+                </div>
+                <div class="message-actions">
+                    <button class="message-action-btn" onclick="pinMessage('${msg.id}')" title="Закрепить">📌</button>
+                </div>
+            `;
+            
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function pinMessage(messageId) {
+            socket.emit('pin-message', {
+                chatId: currentChat,
+                messageId: messageId
+            });
+        }
+
+        function togglePinnedMessages() {
+            const banner = document.getElementById('pinnedBanner');
+            banner.classList.toggle('active');
+        }
+
+        // ГРУППЫ
+        function showCreateGroupModal() {
+            document.getElementById('createGroupModal').classList.add('active');
+        }
+
+        function selectGroupType(element, type) {
+            document.querySelectorAll('.radio-option').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+            element.querySelector('input').checked = true;
+        }
+
+        function previewGroupAvatar(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('groupAvatarPreview').innerHTML = `<img src="${e.target.result}">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function createGroup() {
+            const name = document.getElementById('groupNameInput').value.trim();
+            const type = document.querySelector('input[name="groupType"]:checked').value;
+            
+            if (name) {
+                socket.emit('create-group', { name, type });
+                closeModal('createGroupModal');
+                document.getElementById('groupNameInput').value = '';
+                document.getElementById('groupAvatarPreview').innerHTML = '📁';
+            }
+        }
+
+        // ЗВОНКИ
+        async function startCall(type) {
+            if (!currentChat || currentChatType !== 'dm') return;
+            
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    audio: true,
+                    video: type === 'video'
+                });
+                
+                peerConnection = new RTCPeerConnection({
+                    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+                });
+                
+                localStream.getTracks().forEach(track => {
+                    peerConnection.addTrack(track, localStream);
+                });
+                
+                peerConnection.ontrack = (event) => {
+                    remoteStream = event.streams[0];
+                    document.getElementById('remoteVideo').srcObject = remoteStream;
+                };
+                
+                peerConnection.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        socket.emit('ice-candidate', {
+                            recipientEmail: currentChat,
+                            candidate: event.candidate
+                        });
+                    }
+                };
+                
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+                
+                socket.emit('call-user', {
+                    recipientEmail: currentChat,
+                    offer: offer,
+                    callType: type
+                });
+                
+                showCallScreen();
+                
+            } catch (error) {
+                console.error('Ошибка при инициации звонка:', error);
+                alert('Не удалось получить доступ к микрофону/камере');
+            }
+        }
+
+        function showIncomingCall(data) {
+            incomingCallData = data;
+            document.getElementById('incomingCallName').textContent = data.fromName;
+            document.getElementById('incomingCallAvatar').textContent = data.fromAvatar;
+            document.getElementById('incomingCallModal').classList.add('active');
+        }
+
+        async function acceptCall() {
+            closeModal('incomingCallModal');
+            
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    audio: true,
+                    video: incomingCallData.callType === 'video'
+                });
+                
+                peerConnection = new RTCPeerConnection({
+                    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+                });
+                
+                localStream.getTracks().forEach(track => {
+                    peerConnection.addTrack(track, localStream);
+                });
+                
+                peerConnection.ontrack = (event) => {
+                    remoteStream = event.streams[0];
+                    document.getElementById('remoteVideo').srcObject = remoteStream;
+                };
+                
+                peerConnection.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        socket.emit('ice-candidate', {
+                            recipientEmail: incomingCallData.from,
+                            candidate: event.candidate
+                        });
+                    }
+                };
+                
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(incomingCallData.offer));
+                
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                
+                socket.emit('answer-call', {
+                    recipientEmail: incomingCallData.from,
+                    answer: answer
+                });
+                
+                showCallScreen();
+                
+            } catch (error) {
+                console.error('Ошибка при принятии звонка:', error);
+            }
+        }
+
+        function rejectCall() {
+            closeModal('incomingCallModal');
+            if (incomingCallData) {
+                socket.emit('end-call', incomingCallData.from);
+            }
+        }
+
+        function showCallScreen() {
+            const friend = friends.find(f => f.email === currentChat);
+            if (friend) {
+                document.getElementById('callName').textContent = friend.name;
+                document.getElementById('callAvatar').textContent = friend.avatar;
+            }
+            document.getElementById('callScreen').style.display = 'flex';
+        }
+
+        function endCall() {
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            
+            if (peerConnection) {
+                peerConnection.close();
+            }
+            
+            if (currentChat) {
+                socket.emit('end-call', currentChat);
+            }
+            
+            document.getElementById('callScreen').style.display = 'none';
+            
+            localStream = null;
+            remoteStream = null;
+            peerConnection = null;
+        }
+
+        function toggleCamera() {
+            if (localStream) {
+                const videoTrack = localStream.getVideoTracks()[0];
+                if (videoTrack) {
+                    videoTrack.enabled = !videoTrack.enabled;
+                    document.getElementById('cameraBtn').style.opacity = videoTrack.enabled ? 1 : 0.5;
+                }
+            }
+        }
+
+        async function toggleScreenShare() {
+            try {
+                const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                const screenTrack = screenStream.getVideoTracks()[0];
+                
+                const sender = peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+                if (sender) {
+                    sender.replaceTrack(screenTrack);
+                }
+                
+                screenTrack.onended = () => {
+                    const videoTrack = localStream.getVideoTracks()[0];
+                    sender.replaceTrack(videoTrack);
+                };
+            } catch (error) {
+                console.error('Ошибка демонстрации экрана:', error);
+            }
+        }
+
+        // УТИЛИТЫ
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function showSettings() {
+            document.getElementById('settingsModal').classList.add('active');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ПРОВЕРКА СЕССИИ ПРИ ЗАГРУЗКЕ
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch('/api/check-session');
+                const data = await response.json();
+                
+                if (data.loggedIn) {
+                    currentUser = data.user;
+                    initApp();
+                }
+            } catch (error) {
+                console.error('Ошибка проверки сессии:', error);
+            }
+        });
+    </script>
+</body>
+</html>
