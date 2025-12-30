@@ -1,7 +1,7 @@
 {
-  "name": "sicore",
-  "version": "1.0.0",
-  "description": "Sicore",
+  "name": "sicore-chat",
+  "version": "3.0.0",
+  "description": "Sicore - чат без ограничений",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -13,4 +13,3 @@
     "express-session": "^1.17.3"
   }
 }
-
