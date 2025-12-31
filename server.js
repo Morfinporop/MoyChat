@@ -4,6 +4,7 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
+const fetch = require('node-fetch'); // ВАЖНО!
 
 app.use(express.static(__dirname));
 app.use(express.json());
@@ -19,11 +20,13 @@ db.defaults({
     emailCodes: []
 }).write();
 
-// ==================== RESEND EMAIL SETUP ====================
-const RESEND_API_KEY = 're_HbCXKhjT_QFdh4MJmcpDHiMgoc6CSYDZW';  // ← ВСТАВЬТЕ ВАШ API КЛЮЧ RESEND
+// ==================== RESEND API ====================
+const RESEND_API_KEY = 're_HbCXKhjT_QFdh4MJmcpDHiMgoc6CSYDZW';
 
 async function sendEmailWithResend(email, code) {
     try {
+        console.log(`📧 Отправка через Resend на ${email}...`);
+        
         const response = await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: {
@@ -31,7 +34,7 @@ async function sendEmailWithResend(email, code) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                from: 'Sicore <onboarding@resend.dev>',  // Для теста используйте этот адрес
+                from: 'Sicore <onboarding@resend.dev>',
                 to: email,
                 subject: 'Код подтверждения Sicore',
                 html: `
@@ -46,7 +49,6 @@ async function sendEmailWithResend(email, code) {
                                 ${code}
                             </div>
                             <p style="color: #6b5449; font-size: 14px;">Код действителен 10 минут</p>
-                            <p style="color: #6b5449; font-size: 14px;">Если вы не запрашивали этот код, просто проигнорируйте это письмо.</p>
                         </div>
                     </div>
                 `
@@ -56,14 +58,14 @@ async function sendEmailWithResend(email, code) {
         const data = await response.json();
         
         if (response.ok) {
-            console.log('✅ Email отправлен через Resend:', data.id);
+            console.log('✅ Email отправлен! ID:', data.id);
             return true;
         } else {
-            console.error('❌ Ошибка Resend:', data);
+            console.error('❌ Resend error:', data);
             return false;
         }
     } catch (error) {
-        console.error('❌ Ошибка отправки email:', error);
+        console.error('❌ Ошибка fetch:', error.message);
         return false;
     }
 }
@@ -72,7 +74,6 @@ function generateCode() {
     return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-// Отправка кода на email
 app.post('/api/send-email-code', async (req, res) => {
     const { email } = req.body;
 
@@ -82,7 +83,6 @@ app.post('/api/send-email-code', async (req, res) => {
 
     const code = generateCode();
     
-    // Сохраняем код в БД
     db.get('emailCodes')
         .push({
             email: email,
@@ -91,26 +91,22 @@ app.post('/api/send-email-code', async (req, res) => {
         })
         .write();
 
-    // Очищаем старые коды
     db.set('emailCodes', db.get('emailCodes').filter(c => c.expires > Date.now()).value()).write();
 
-    console.log(`📧 Отправка кода на ${email}: ${code}`);
+    console.log(`🔑 Код для ${email}: ${code}`);
 
     const sent = await sendEmailWithResend(email, code);
 
     if (sent) {
-        console.log('✅ Email успешно отправлен');
         res.json({ success: true });
     } else {
-        console.log('❌ Не удалось отправить email');
         res.json({ 
             success: false, 
-            message: 'Ошибка отправки email. Проверьте API ключ Resend.'
+            message: 'Ошибка отправки. Проверьте API ключ Resend.'
         });
     }
 });
 
-// Проверка кода
 app.post('/api/verify-email-code', (req, res) => {
     const { email, code } = req.body;
 
@@ -141,7 +137,6 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
 
-// ==================== SOCKET.IO ====================
 const onlineUsers = new Map();
 
 io.on('connection', (socket) => {
@@ -174,7 +169,6 @@ io.on('connection', (socket) => {
         db.get('users').push(user).write();
         onlineUsers.set(socket.id, userId);
 
-        // Создаем чат с ботом
         const botChat = {
             id: 'chat_bot_' + userId,
             participants: ['sicore_bot', userId],
@@ -262,6 +256,8 @@ io.on('connection', (socket) => {
         const currentUser = db.get('users').find({ id: userId }).value();
         const targetUser = db.get('users').find({ id: targetUserId }).value();
         
+        if (!targetUser) return;
+
         if (currentUser.blockedUsers.includes(targetUserId) || 
             targetUser.blockedUsers.includes(userId)) {
             return;
@@ -367,7 +363,6 @@ io.on('connection', (socket) => {
     });
 
     socket.on('delete-chat', (data) => {
-        const userId = onlineUsers.get(socket.id);
         const chat = db.get('chats').find({ id: data.chatId }).value();
         
         if (!chat) return;
@@ -489,19 +484,19 @@ function formatUser(user, currentUser) {
         email: user.email
     };
 
-    if (user.privacy.showPhoto === 'nobody') {
+    if (user.privacy?.showPhoto === 'nobody') {
         formatted.avatar = null;
     } else {
         formatted.avatar = user.avatar;
     }
 
-    if (user.privacy.showBio === 'nobody') {
+    if (user.privacy?.showBio === 'nobody') {
         formatted.bio = '';
     } else {
         formatted.bio = user.bio;
     }
 
-    formatted.canMessage = user.privacy.whoCanMessage === 'everyone';
+    formatted.canMessage = user.privacy?.whoCanMessage === 'everyone';
     formatted.isBlocked = currentUser?.blockedUsers?.includes(user.id);
 
     return formatted;
@@ -526,14 +521,5 @@ const PORT = process.env.PORT || 3000;
 http.listen(PORT, () => {
     console.log('🚀 Sicore Messenger');
     console.log(`📱 http://localhost:${PORT}`);
-    console.log('');
-    if (RESEND_API_KEY === 're_YOUR_API_KEY_HERE') {
-        console.log('⚠️  НАСТРОЙТЕ RESEND API KEY!');
-        console.log('   1. Зайдите на https://resend.com/');
-        console.log('   2. Создайте API ключ');
-        console.log('   3. Вставьте в server.js');
-    } else {
-        console.log('✅ Resend настроен');
-    }
-    console.log('');
+    console.log('✅ Resend email настроен');
 });
