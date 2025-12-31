@@ -4,8 +4,6 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
-// УДАЛИЛИ: const fetch = require('node-fetch');
-// fetch уже встроен в Node.js 18+
 
 app.use(express.static(__dirname));
 app.use(express.json());
@@ -21,52 +19,43 @@ db.defaults({
     emailCodes: []
 }).write();
 
-// ==================== RESEND API ====================
-const RESEND_API_KEY = 're_HbCXKhjT_QFdh4MJmcpDHiMgoc6CSYDZW';
+// ==================== EMAILJS API ====================
+const EMAILJS_SERVICE_ID = 'service_w8lan2y';
+const EMAILJS_TEMPLATE_ID = 'template_sicore';  // Замените на ваш Template ID
+const EMAILJS_PUBLIC_KEY = 't8XHLcCRf_5ITFOHp';
 
-async function sendEmailWithResend(email, code) {
+async function sendEmailWithEmailJS(email, code) {
     try {
-        console.log(`📧 Отправка через Resend на ${email}...`);
+        console.log(`📧 Отправка через EmailJS на ${email}...`);
         
-        const response = await fetch('https://api.resend.com/emails', {
+        const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${RESEND_API_KEY}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                from: 'Sicore <onboarding@resend.dev>',
-                to: email,
-                subject: 'Код подтверждения Sicore',
-                html: `
-                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                        <div style="background: linear-gradient(135deg, #3d2e26 0%, #6b5449 100%); padding: 30px; border-radius: 10px; text-align: center;">
-                            <h1 style="color: #f5f1ed; margin: 0;">☕ Sicore</h1>
-                            <p style="color: #b8956a; margin: 5px 0;">Безопасный мессенджер</p>
-                        </div>
-                        <div style="background: #f5f1ed; padding: 30px; border-radius: 10px; margin-top: 20px;">
-                            <h2 style="color: #3d2e26;">Ваш код подтверждения:</h2>
-                            <div style="background: #3d2e26; color: #f5f1ed; font-size: 32px; font-weight: bold; padding: 20px; border-radius: 10px; text-align: center; letter-spacing: 5px; margin: 20px 0;">
-                                ${code}
-                            </div>
-                            <p style="color: #6b5449; font-size: 14px;">Код действителен 10 минут</p>
-                        </div>
-                    </div>
-                `
+                service_id: EMAILJS_SERVICE_ID,
+                template_id: EMAILJS_TEMPLATE_ID,
+                user_id: EMAILJS_PUBLIC_KEY,
+                template_params: {
+                    to_email: email,
+                    to_name: email.split('@')[0],
+                    verification_code: code,
+                    message: `Ваш код подтверждения: ${code}`
+                }
             })
         });
 
-        const data = await response.json();
-        
         if (response.ok) {
-            console.log('✅ Email отправлен! ID:', data.id);
+            console.log('✅ Email отправлен через EmailJS!');
             return true;
         } else {
-            console.error('❌ Resend error:', data);
+            const errorText = await response.text();
+            console.error('❌ EmailJS error:', errorText);
             return false;
         }
     } catch (error) {
-        console.error('❌ Ошибка fetch:', error.message);
+        console.error('❌ Ошибка отправки:', error.message);
         return false;
     }
 }
@@ -96,14 +85,14 @@ app.post('/api/send-email-code', async (req, res) => {
 
     console.log(`🔑 Код для ${email}: ${code}`);
 
-    const sent = await sendEmailWithResend(email, code);
+    const sent = await sendEmailWithEmailJS(email, code);
 
     if (sent) {
         res.json({ success: true });
     } else {
         res.json({ 
             success: false, 
-            message: 'Ошибка отправки. Проверьте API ключ Resend.'
+            message: 'Ошибка отправки. Проверьте настройки EmailJS.'
         });
     }
 });
@@ -521,7 +510,7 @@ function broadcastUserStatus(userId, status) {
             if (participantId !== userId) {
                 const socketId = getSocketByUserId(participantId);
                 if (socketId) {
-                    io.to(socketId).emit('user-status-changed', {
+                    io.to(socketId).emit('user-status', {
                         userId: userId,
                         status: status,
                         lastSeen: Date.now()
@@ -534,5 +523,6 @@ function broadcastUserStatus(userId, status) {
 
 const PORT = process.env.PORT || 3000;
 http.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`🚀 Sicore server running on port ${PORT}`);
+    console.log(`📧 EmailJS Service: ${EMAILJS_SERVICE_ID}`);
 });
