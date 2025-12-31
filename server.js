@@ -23,19 +23,76 @@ let chats = new Map();
 let messages = new Map();
 let smsCodes = new Map();
 
+// ==================== SMS.RU ФУНКЦИЯ ====================
 async function sendSMS_SMSRU(phone, code) {
     try {
+        console.log(`📤 Отправка SMS на номер: ${phone}`);
+        console.log(`📝 Код: ${code}`);
+        
+        // Формат номера для SMS.RU: 79XXXXXXXXX (без +)
+        let formattedPhone = phone.replace(/\D/g, ''); // Убираем все кроме цифр
+        
+        // Если номер начинается с 8, меняем на 7
+        if (formattedPhone.startsWith('8')) {
+            formattedPhone = '7' + formattedPhone.slice(1);
+        }
+        
+        // Если номер начинается с +7, убираем +
+        if (formattedPhone.startsWith('7')) {
+            formattedPhone = formattedPhone;
+        }
+        
+        console.log(`📞 Отформатированный номер: ${formattedPhone}`);
+        
         const response = await axios.get('https://sms.ru/sms/send', {
             params: {
                 api_id: SMSRU_API_KEY,
-                to: phone,
+                to: formattedPhone,
                 msg: `Ваш код для входа в Sicore: ${code}`,
                 json: 1
-            }
+            },
+            timeout: 10000 // 10 секунд таймаут
         });
-        return response.data.status === 'OK';
+        
+        console.log('📥 Ответ от SMS.RU:', JSON.stringify(response.data, null, 2));
+        
+        // Проверяем ответ от SMS.RU
+        if (response.data && response.data.status === 'OK') {
+            console.log('✅ SMS успешно отправлено!');
+            return true;
+        } else {
+            console.error('❌ Ошибка SMS.RU:', response.data);
+            
+            // Расшифровка кодов ошибок SMS.RU
+            if (response.data.status_code) {
+                const errorCodes = {
+                    100: 'Запрос выполнен успешно',
+                    200: 'Неправильный API ключ',
+                    201: 'Недостаточно средств на балансе',
+                    202: 'Неправильно указан получатель',
+                    203: 'Нет текста сообщения',
+                    204: 'Имя отправителя не согласовано',
+                    205: 'Сообщение слишком длинное',
+                    206: 'Превышен лимит на отправку в сутки',
+                    207: 'На этот номер нельзя отправлять сообщения',
+                    208: 'Неправильный формат времени',
+                    209: 'Вы добавили этот номер в стоп-лист',
+                    210: 'Используется GET, где необходим POST',
+                    211: 'Метод не найден',
+                    220: 'Сервис временно недоступен'
+                };
+                
+                const errorMsg = errorCodes[response.data.status_code] || 'Неизвестная ошибка';
+                console.error(`❌ Код ошибки ${response.data.status_code}: ${errorMsg}`);
+            }
+            
+            return false;
+        }
     } catch (error) {
-        console.error('SMS.RU Error:', error);
+        console.error('❌ Критическая ошибка при отправке SMS:', error.message);
+        if (error.response) {
+            console.error('📥 Ответ сервера:', error.response.data);
+        }
         return false;
     }
 }
@@ -47,45 +104,71 @@ function generateCode() {
 app.post('/api/send-sms', async (req, res) => {
     const { phone } = req.body;
 
+    console.log('📲 Получен запрос на отправку SMS для номера:', phone);
+
     if (!phone || phone.length < 11) {
+        console.log('❌ Некорректный номер телефона');
         return res.json({ success: false, message: 'Некорректный номер телефона' });
     }
 
     const code = generateCode();
     
+    // Сохраняем код с 5-минутным сроком действия
     smsCodes.set(phone, {
         code: code,
         expires: Date.now() + 5 * 60 * 1000
     });
 
-    console.log(`📱 SMS код для ${phone}: ${code}`);
-    const sent = true;
+    console.log(`💾 Код сохранен: ${code} для номера ${phone}`);
+    
+    // ==================== РЕАЛЬНАЯ ОТПРАВКА SMS ====================
+    const sent = await sendSMS_SMSRU(phone, code);
+    
+    // ==================== ДЛЯ ТЕСТИРОВАНИЯ (временно) ====================
+    // Если SMS не отправилась, все равно показываем код в консоли
+    if (!sent) {
+        console.log('⚠️ SMS не отправлена, но код доступен для тестирования');
+        console.log(`🔑 ТЕСТОВЫЙ КОД: ${code}`);
+        // Можно временно вернуть success: true для тестирования
+        // return res.json({ success: true, testMode: true });
+    }
 
     if (sent) {
+        console.log('✅ SMS успешно отправлена');
         res.json({ success: true });
     } else {
-        res.json({ success: false, message: 'Ошибка отправки SMS. Попробуйте позже.' });
+        console.log('❌ Не удалось отправить SMS');
+        res.json({ 
+            success: false, 
+            message: 'Ошибка отправки SMS. Проверьте баланс и API ключ в личном кабинете SMS.RU' 
+        });
     }
 });
 
 app.post('/api/verify-sms', (req, res) => {
     const { phone, code } = req.body;
 
+    console.log(`🔍 Проверка кода ${code} для номера ${phone}`);
+
     const savedCode = smsCodes.get(phone);
 
     if (!savedCode) {
+        console.log('❌ Код не найден в базе');
         return res.json({ success: false, message: 'Код не найден. Запросите новый код.' });
     }
 
     if (Date.now() > savedCode.expires) {
+        console.log('❌ Код истек');
         smsCodes.delete(phone);
         return res.json({ success: false, message: 'Код истек. Запросите новый код.' });
     }
 
     if (savedCode.code !== code) {
+        console.log(`❌ Неверный код. Ожидался: ${savedCode.code}, получен: ${code}`);
         return res.json({ success: false, message: 'Неверный код' });
     }
 
+    console.log('✅ Код верный!');
     smsCodes.delete(phone);
 
     let existingUser = null;
@@ -100,6 +183,24 @@ app.post('/api/verify-sms', (req, res) => {
         success: true, 
         isNewUser: !existingUser 
     });
+});
+
+// ==================== ПРОВЕРКА API КЛЮЧА (новый endpoint) ====================
+app.get('/api/check-sms-balance', async (req, res) => {
+    try {
+        const response = await axios.get('https://sms.ru/my/balance', {
+            params: {
+                api_id: SMSRU_API_KEY,
+                json: 1
+            }
+        });
+        
+        console.log('💰 Баланс SMS.RU:', response.data);
+        res.json(response.data);
+    } catch (error) {
+        console.error('❌ Ошибка проверки баланса:', error.message);
+        res.json({ error: error.message });
+    }
 });
 
 io.on('connection', (socket) => {
@@ -340,4 +441,7 @@ const PORT = process.env.PORT || 3000;
 http.listen(PORT, () => {
     console.log('🚀 Server running on port:', PORT);
     console.log(`📱 http://localhost:${PORT}`);
+    console.log('');
+    console.log('📋 Проверьте баланс SMS.RU:');
+    console.log(`   curl http://localhost:${PORT}/api/check-sms-balance`);
 });
