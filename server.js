@@ -4,7 +4,8 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
-const fetch = require('node-fetch'); // ВАЖНО!
+// УДАЛИЛИ: const fetch = require('node-fetch');
+// fetch уже встроен в Node.js 18+
 
 app.use(express.static(__dirname));
 app.use(express.json());
@@ -258,12 +259,12 @@ io.on('connection', (socket) => {
         
         if (!targetUser) return;
 
-        if (currentUser.blockedUsers.includes(targetUserId) || 
-            targetUser.blockedUsers.includes(userId)) {
+        if (currentUser.blockedUsers?.includes(targetUserId) || 
+            targetUser.blockedUsers?.includes(userId)) {
             return;
         }
 
-        if (targetUser.privacy.whoCanMessage === 'nobody' && targetUserId !== 'sicore_bot') {
+        if (targetUser.privacy?.whoCanMessage === 'nobody' && targetUserId !== 'sicore_bot') {
             socket.emit('chat-restricted', { userId: targetUserId });
             return;
         }
@@ -329,6 +330,7 @@ io.on('connection', (socket) => {
         if (!userId || targetUserId === 'sicore_bot') return;
 
         const user = db.get('users').find({ id: userId }).value();
+        if (!user.blockedUsers) user.blockedUsers = [];
         if (!user.blockedUsers.includes(targetUserId)) {
             user.blockedUsers.push(targetUserId);
             db.get('users').find({ id: userId }).assign(user).write();
@@ -340,7 +342,7 @@ io.on('connection', (socket) => {
         if (!userId) return;
 
         const user = db.get('users').find({ id: userId }).value();
-        user.blockedUsers = user.blockedUsers.filter(id => id !== targetUserId);
+        user.blockedUsers = user.blockedUsers?.filter(id => id !== targetUserId) || [];
         db.get('users').find({ id: userId }).assign(user).write();
     });
 
@@ -509,17 +511,4 @@ function getSocketByUserId(userId) {
     return null;
 }
 
-function broadcastUserStatus(userId, status) {
-    io.emit('user-status', {
-        userId: userId,
-        status: status,
-        lastSeen: Date.now()
-    });
-}
-
-const PORT = process.env.PORT || 3000;
-http.listen(PORT, () => {
-    console.log('🚀 Sicore Messenger');
-    console.log(`📱 http://localhost:${PORT}`);
-    console.log('✅ Resend email настроен');
-});
+function broadcast
