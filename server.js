@@ -2,18 +2,16 @@ const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
-const nodemailer = require('nodemailer');
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 
 app.use(express.static(__dirname));
 app.use(express.json());
 
-// База данных (сохраняется в файл)
+// База данных
 const adapter = new FileSync('db.json');
 const db = low(adapter);
 
-// Инициализация БД
 db.defaults({ 
     users: [], 
     chats: [], 
@@ -21,40 +19,54 @@ db.defaults({
     emailCodes: []
 }).write();
 
-// ==================== EMAIL SETUP ====================
-// НАСТРОЙКА GMAIL:
-// 1. Зайдите в Google Account: https://myaccount.google.com/
-// 2. Безопасность → Двухэтапная аутентификация → ВКЛЮЧИТЕ
-// 3. Пароли приложений → Выберите "Почта" и "Другое устройство"
-// 4. Скопируйте сгенерированный пароль (16 символов)
-// 5. Вставьте ниже
+// ==================== RESEND EMAIL SETUP ====================
+const RESEND_API_KEY = 're_HbCXKhjT_QFdh4MJmcpDHiMgoc6CSYDZW';  // ← ВСТАВЬТЕ ВАШ API КЛЮЧ RESEND
 
-const EMAIL_USER = 'kirillploskin471@gmail.com';  // ← ВАША ПОЧТА GMAIL
-const EMAIL_PASS = 'acjp aomn yocd wcee';   // ← ПАРОЛЬ ПРИЛОЖЕНИЯ (16 символов)
+async function sendEmailWithResend(email, code) {
+    try {
+        const response = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${RESEND_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                from: 'Sicore <onboarding@resend.dev>',  // Для теста используйте этот адрес
+                to: email,
+                subject: 'Код подтверждения Sicore',
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                        <div style="background: linear-gradient(135deg, #3d2e26 0%, #6b5449 100%); padding: 30px; border-radius: 10px; text-align: center;">
+                            <h1 style="color: #f5f1ed; margin: 0;">☕ Sicore</h1>
+                            <p style="color: #b8956a; margin: 5px 0;">Безопасный мессенджер</p>
+                        </div>
+                        <div style="background: #f5f1ed; padding: 30px; border-radius: 10px; margin-top: 20px;">
+                            <h2 style="color: #3d2e26;">Ваш код подтверждения:</h2>
+                            <div style="background: #3d2e26; color: #f5f1ed; font-size: 32px; font-weight: bold; padding: 20px; border-radius: 10px; text-align: center; letter-spacing: 5px; margin: 20px 0;">
+                                ${code}
+                            </div>
+                            <p style="color: #6b5449; font-size: 14px;">Код действителен 10 минут</p>
+                            <p style="color: #6b5449; font-size: 14px;">Если вы не запрашивали этот код, просто проигнорируйте это письмо.</p>
+                        </div>
+                    </div>
+                `
+            })
+        });
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: EMAIL_USER,
-        pass: EMAIL_PASS
+        const data = await response.json();
+        
+        if (response.ok) {
+            console.log('✅ Email отправлен через Resend:', data.id);
+            return true;
+        } else {
+            console.error('❌ Ошибка Resend:', data);
+            return false;
+        }
+    } catch (error) {
+        console.error('❌ Ошибка отправки email:', error);
+        return false;
     }
-});
-
-// Проверка подключения к email при старте
-transporter.verify((error, success) => {
-    if (error) {
-        console.error('❌ Email не настроен:', error.message);
-        console.log('');
-        console.log('⚠️  НАСТРОЙТЕ EMAIL:');
-        console.log('   1. Зайдите на https://myaccount.google.com/');
-        console.log('   2. Безопасность → Двухэтапная аутентификация');
-        console.log('   3. Пароли приложений → Создать');
-        console.log('   4. Вставьте в server.js');
-        console.log('');
-    } else {
-        console.log('✅ Email готов к отправке');
-    }
-});
+}
 
 function generateCode() {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -75,7 +87,7 @@ app.post('/api/send-email-code', async (req, res) => {
         .push({
             email: email,
             code: code,
-            expires: Date.now() + 10 * 60 * 1000 // 10 минут
+            expires: Date.now() + 10 * 60 * 1000
         })
         .write();
 
@@ -84,36 +96,16 @@ app.post('/api/send-email-code', async (req, res) => {
 
     console.log(`📧 Отправка кода на ${email}: ${code}`);
 
-    try {
-        await transporter.sendMail({
-            from: `"Sicore" <${EMAIL_USER}>`,
-            to: email,
-            subject: 'Код подтверждения Sicore',
-            html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                    <div style="background: linear-gradient(135deg, #3d2e26 0%, #6b5449 100%); padding: 30px; border-radius: 10px; text-align: center;">
-                        <h1 style="color: #f5f1ed; margin: 0;">☕ Sicore</h1>
-                        <p style="color: #b8956a; margin: 5px 0;">Безопасный мессенджер</p>
-                    </div>
-                    <div style="background: #f5f1ed; padding: 30px; border-radius: 10px; margin-top: 20px;">
-                        <h2 style="color: #3d2e26;">Ваш код подтверждения:</h2>
-                        <div style="background: #3d2e26; color: #f5f1ed; font-size: 32px; font-weight: bold; padding: 20px; border-radius: 10px; text-align: center; letter-spacing: 5px; margin: 20px 0;">
-                            ${code}
-                        </div>
-                        <p style="color: #6b5449; font-size: 14px;">Код действителен 10 минут</p>
-                        <p style="color: #6b5449; font-size: 14px;">Если вы не запрашивали этот код, просто проигнорируйте это письмо.</p>
-                    </div>
-                </div>
-            `
-        });
+    const sent = await sendEmailWithResend(email, code);
 
-        console.log('✅ Email отправлен');
+    if (sent) {
+        console.log('✅ Email успешно отправлен');
         res.json({ success: true });
-    } catch (error) {
-        console.error('❌ Ошибка отправки email:', error);
+    } else {
+        console.log('❌ Не удалось отправить email');
         res.json({ 
             success: false, 
-            message: 'Ошибка отправки email. Проверьте настройки в server.js'
+            message: 'Ошибка отправки email. Проверьте API ключ Resend.'
         });
     }
 });
@@ -135,10 +127,8 @@ app.post('/api/verify-email-code', (req, res) => {
         return res.json({ success: false, message: 'Код истек' });
     }
 
-    // Удаляем использованный код
     db.get('emailCodes').remove({ email: email }).write();
 
-    // Проверяем существование пользователя
     const existingUser = db.get('users').find({ email: email }).value();
 
     res.json({ 
@@ -152,12 +142,11 @@ app.get('/', (req, res) => {
 });
 
 // ==================== SOCKET.IO ====================
-const onlineUsers = new Map(); // socketId -> userId
+const onlineUsers = new Map();
 
 io.on('connection', (socket) => {
     console.log('🟢 Connected:', socket.id);
 
-    // Регистрация
     socket.on('register', (data) => {
         const userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         
@@ -170,7 +159,7 @@ io.on('connection', (socket) => {
             bio: '',
             status: 'online',
             lastSeen: Date.now(),
-            twoFactorAuth: data.twoFactorAuth || false,
+            twoFactorAuth: false,
             privacy: {
                 showPhone: 'everyone',
                 showLastSeen: true,
@@ -198,7 +187,6 @@ io.on('connection', (socket) => {
         };
         db.get('chats').push(botChat).write();
 
-        // Приветственное сообщение от бота
         const welcomeMsg = {
             id: 'msg_' + Date.now(),
             chatId: botChat.id,
@@ -213,7 +201,6 @@ io.on('connection', (socket) => {
         broadcastUserStatus(userId, 'online');
     });
 
-    // Логин
     socket.on('login', (data) => {
         const user = db.get('users').find({ email: data.email }).value();
         
@@ -228,7 +215,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Отправка сообщения
     socket.on('send-message', (data) => {
         const userId = onlineUsers.get(socket.id);
         if (!userId) return;
@@ -250,7 +236,6 @@ io.on('connection', (socket) => {
             chat.lastMessageTime = Date.now();
             db.get('chats').find({ id: data.chatId }).assign(chat).write();
 
-            // Отправляем обоим участникам
             chat.participants.forEach(participantId => {
                 const participantSocket = getSocketByUserId(participantId);
                 if (participantSocket) {
@@ -262,7 +247,6 @@ io.on('connection', (socket) => {
                 }
             });
 
-            // Звук уведомления
             const recipient = chat.participants.find(p => p !== userId);
             const recipientSocket = getSocketByUserId(recipient);
             if (recipientSocket && !chat.muted) {
@@ -271,12 +255,10 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Создание чата
     socket.on('create-chat', (targetUserId) => {
         const userId = onlineUsers.get(socket.id);
         if (!userId) return;
 
-        // Проверяем блокировку
         const currentUser = db.get('users').find({ id: userId }).value();
         const targetUser = db.get('users').find({ id: targetUserId }).value();
         
@@ -285,13 +267,11 @@ io.on('connection', (socket) => {
             return;
         }
 
-        // Проверяем настройки приватности
         if (targetUser.privacy.whoCanMessage === 'nobody' && targetUserId !== 'sicore_bot') {
             socket.emit('chat-restricted', { userId: targetUserId });
             return;
         }
 
-        // Проверяем существующий чат
         let existingChat = db.get('chats')
             .find(c => c.participants.includes(userId) && c.participants.includes(targetUserId))
             .value();
@@ -301,7 +281,6 @@ io.on('connection', (socket) => {
             return;
         }
 
-        // Создаем новый чат
         const chatId = 'chat_' + Date.now();
         const newChat = {
             id: chatId,
@@ -316,11 +295,9 @@ io.on('connection', (socket) => {
 
         db.get('chats').push(newChat).write();
 
-        // Отправляем только инициатору (не создаем чат у второго пользователя автоматически)
         socket.emit('chat-created', formatChat(newChat, userId));
     });
 
-    // Обновление профиля
     socket.on('update-profile', (data) => {
         const userId = onlineUsers.get(socket.id);
         if (!userId) return;
@@ -333,7 +310,6 @@ io.on('connection', (socket) => {
         
         db.get('users').find({ id: userId }).assign(user).write();
 
-        // Уведомляем всех о изменении
         io.emit('user-updated', {
             userId: userId,
             name: user.name,
@@ -343,7 +319,6 @@ io.on('connection', (socket) => {
         });
     });
 
-    // Обновление приватности
     socket.on('update-privacy', (data) => {
         const userId = onlineUsers.get(socket.id);
         if (!userId) return;
@@ -353,7 +328,6 @@ io.on('connection', (socket) => {
         db.get('users').find({ id: userId }).assign(user).write();
     });
 
-    // Блокировка/разблокировка
     socket.on('block-user', (targetUserId) => {
         const userId = onlineUsers.get(socket.id);
         if (!userId || targetUserId === 'sicore_bot') return;
@@ -374,7 +348,6 @@ io.on('connection', (socket) => {
         db.get('users').find({ id: userId }).assign(user).write();
     });
 
-    // Закрепление чата
     socket.on('pin-chat', (chatId) => {
         const chat = db.get('chats').find({ id: chatId }).value();
         if (chat) {
@@ -384,7 +357,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Мут чата
     socket.on('mute-chat', (chatId) => {
         const chat = db.get('chats').find({ id: chatId }).value();
         if (chat) {
@@ -394,7 +366,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Удаление чата
     socket.on('delete-chat', (data) => {
         const userId = onlineUsers.get(socket.id);
         const chat = db.get('chats').find({ id: data.chatId }).value();
@@ -402,7 +373,6 @@ io.on('connection', (socket) => {
         if (!chat) return;
 
         if (data.forEveryone) {
-            // Удалить для всех
             db.get('chats').remove({ id: data.chatId }).write();
             db.get('messages').remove({ chatId: data.chatId }).write();
             
@@ -413,32 +383,25 @@ io.on('connection', (socket) => {
                 }
             });
         } else {
-            // Удалить только для себя
-            // TODO: Реализовать логику удаления только для одного пользователя
             socket.emit('chat-deleted', data.chatId);
         }
     });
 
-    // Удаление аккаунта
     socket.on('delete-account', () => {
         const userId = onlineUsers.get(socket.id);
         if (!userId) return;
 
-        // Удаляем все чаты пользователя
         const userChats = db.get('chats').filter(c => c.participants.includes(userId)).value();
         userChats.forEach(chat => {
             db.get('messages').remove({ chatId: chat.id }).write();
         });
         db.get('chats').remove(c => c.participants.includes(userId)).write();
-
-        // Удаляем пользователя
         db.get('users').remove({ id: userId }).write();
         
         onlineUsers.delete(socket.id);
         socket.emit('account-deleted');
     });
 
-    // Фон чата
     socket.on('set-chat-background', (data) => {
         const chat = db.get('chats').find({ id: data.chatId }).value();
         if (chat) {
@@ -447,7 +410,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Отключение
     socket.on('disconnect', () => {
         const userId = onlineUsers.get(socket.id);
         if (userId && userId !== 'sicore_bot') {
@@ -465,7 +427,6 @@ io.on('connection', (socket) => {
     });
 });
 
-// Вспомогательные функции
 function sendInitData(socket, userId) {
     const user = db.get('users').find({ id: userId }).value();
     const userChats = db.get('chats')
@@ -509,7 +470,7 @@ function formatChat(chat, currentUserId) {
     return {
         ...chat,
         userId: otherUserId,
-        name: otherUser ? `${otherUser.name} ${otherUser.lastname}`.trim() : 'Пользователь',
+        name: otherUser ? `${otherUser.name} ${otherUser.lastname || ''}`.trim() : 'Пользователь',
         avatar: otherUser?.avatar,
         status: otherUser?.status || 'offline',
         lastSeen: otherUser?.lastSeen,
@@ -524,19 +485,17 @@ function formatUser(user, currentUser) {
         name: user.name,
         lastname: user.lastname,
         status: user.status,
-        lastSeen: user.lastSeen
+        lastSeen: user.lastSeen,
+        email: user.email
     };
 
-    // Применяем настройки приватности
-    if (user.privacy.showPhoto === 'nobody' || 
-        (user.privacy.showPhoto === 'contacts' && !currentUser)) {
+    if (user.privacy.showPhoto === 'nobody') {
         formatted.avatar = null;
     } else {
         formatted.avatar = user.avatar;
     }
 
-    if (user.privacy.showBio === 'nobody' ||
-        (user.privacy.showBio === 'contacts' && !currentUser)) {
+    if (user.privacy.showBio === 'nobody') {
         formatted.bio = '';
     } else {
         formatted.bio = user.bio;
@@ -568,10 +527,13 @@ http.listen(PORT, () => {
     console.log('🚀 Sicore Messenger');
     console.log(`📱 http://localhost:${PORT}`);
     console.log('');
-    console.log('📧 Настройте Gmail для отправки кодов:');
-    console.log('   1. https://myaccount.google.com/security');
-    console.log('   2. Двухэтапная аутентификация → Включить');
-    console.log('   3. Пароли приложений → Создать');
-    console.log('   4. Вставьте в server.js (EMAIL_USER и EMAIL_PASS)');
+    if (RESEND_API_KEY === 're_YOUR_API_KEY_HERE') {
+        console.log('⚠️  НАСТРОЙТЕ RESEND API KEY!');
+        console.log('   1. Зайдите на https://resend.com/');
+        console.log('   2. Создайте API ключ');
+        console.log('   3. Вставьте в server.js');
+    } else {
+        console.log('✅ Resend настроен');
+    }
     console.log('');
 });
