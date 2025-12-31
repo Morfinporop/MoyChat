@@ -36,47 +36,40 @@ async function sendSMS_SMSRU(phone, code) {
         
         console.log(`📞 Отформатированный номер: ${formattedPhone}`);
         
-        // ИСПРАВЛЕНИЕ: Не указываем отправителя, используется стандартный
+        // ИСПОЛЬЗУЕМ СТАНДАРТНОГО ОТПРАВИТЕЛЯ (уже подключен ко всем операторам)
         const response = await axios.get('https://sms.ru/sms/send', {
             params: {
                 api_id: SMSRU_API_KEY,
                 to: formattedPhone,
                 msg: `Код Sicore: ${code}`,
+                // НЕ УКАЗЫВАЕМ from - будет использован отправитель по умолчанию от SMS.RU
                 json: 1
-                // НЕ указываем from - будет использован отправитель по умолчанию
             },
             timeout: 10000
         });
         
         console.log('📥 Ответ от SMS.RU:', JSON.stringify(response.data, null, 2));
         
+        // ИСПРАВЛЕННАЯ ПРОВЕРКА СТАТУСА
         if (response.data && response.data.status === 'OK') {
-            // Проверяем статус конкретного SMS
             const smsStatus = response.data.sms && response.data.sms[formattedPhone];
             
-            if (smsStatus && smsStatus.status === 'OK') {
-                console.log('✅ SMS успешно отправлено!');
-                return true;
-            } else if (smsStatus && smsStatus.status === 'ERROR') {
-                console.error(`❌ Ошибка отправки SMS: ${smsStatus.status_text}`);
-                console.error(`❌ Код ошибки: ${smsStatus.status_code}`);
-                
-                // Ошибка 204 - не настроен отправитель
-                if (smsStatus.status_code === 204) {
-                    console.error('');
-                    console.error('⚠️  НЕОБХОДИМО НАСТРОИТЬ ОТПРАВИТЕЛЯ В SMS.RU:');
-                    console.error('   1. Зайдите на https://sms.ru/');
-                    console.error('   2. Перейдите в раздел "Отправители"');
-                    console.error('   3. Выберите "Отправитель по умолчанию" или создайте нового');
-                    console.error('   4. Для теста используйте отправителя "sms"');
-                    console.error('');
+            if (smsStatus) {
+                if (smsStatus.status === 'OK') {
+                    console.log('✅ SMS успешно отправлено!');
+                    console.log(`✉️  ID сообщения: ${smsStatus.sms_id}`);
+                    return true;
+                } else if (smsStatus.status === 'ERROR') {
+                    console.error(`❌ Ошибка отправки SMS: ${smsStatus.status_text}`);
+                    console.error(`❌ Код ошибки: ${smsStatus.status_code}`);
+                    return false;
                 }
-                
-                return false;
             }
         }
         
+        console.error('❌ Неожиданный ответ от сервера');
         return false;
+        
     } catch (error) {
         console.error('❌ Критическая ошибка при отправке SMS:', error.message);
         if (error.response) {
@@ -112,17 +105,18 @@ app.post('/api/send-sms', async (req, res) => {
     const sent = await sendSMS_SMSRU(phone, code);
     
     if (!sent) {
-        console.log('⚠️ SMS не отправлена, код доступен в консоли для тестирования');
-        console.log(`🔑 ТЕСТОВЫЙ КОД: ${code}`);
-        // Временно возвращаем success для тестирования
+        console.log('⚠️ SMS не отправлена');
+        console.log(`🔑 ТЕСТОВЫЙ КОД (смотрите в консоли): ${code}`);
+        
+        // ВРЕМЕННО: Разрешаем продолжить даже если SMS не отправлена (для тестирования)
         return res.json({ 
-            success: true, 
+            success: true,
             testMode: true,
-            message: 'Тестовый режим: проверьте код в консоли сервера' 
+            message: 'Тестовый режим активен. Код: ' + code
         });
     }
 
-    console.log('✅ SMS успешно отправлена');
+    console.log('✅ SMS отправлена успешно');
     res.json({ success: true });
 });
 
@@ -179,6 +173,24 @@ app.get('/api/check-sms-balance', async (req, res) => {
         res.json(response.data);
     } catch (error) {
         console.error('❌ Ошибка проверки баланса:', error.message);
+        res.json({ error: error.message });
+    }
+});
+
+// Новый endpoint для проверки отправителей
+app.get('/api/check-senders', async (req, res) => {
+    try {
+        const response = await axios.get('https://sms.ru/senders', {
+            params: {
+                api_id: SMSRU_API_KEY,
+                json: 1
+            }
+        });
+        
+        console.log('📋 Отправители:', response.data);
+        res.json(response.data);
+    } catch (error) {
+        console.error('❌ Ошибка проверки отправителей:', error.message);
         res.json({ error: error.message });
     }
 });
@@ -422,7 +434,11 @@ http.listen(PORT, () => {
     console.log('🚀 Server running on port:', PORT);
     console.log(`📱 http://localhost:${PORT}`);
     console.log('');
-    console.log('⚠️  НАСТРОЙТЕ ОТПРАВИТЕЛЯ В SMS.RU:');
-    console.log('   https://sms.ru/panel/senders');
+    console.log('📋 Проверка настроек:');
+    console.log(`   Баланс: http://localhost:${PORT}/api/check-sms-balance`);
+    console.log(`   Отправители: http://localhost:${PORT}/api/check-senders`);
+    console.log('');
+    console.log('⚠️  ВРЕМЕННО ВКЛЮЧЕН ТЕСТОВЫЙ РЕЖИМ');
+    console.log('   Коды будут показываться в консоли');
     console.log('');
 });
