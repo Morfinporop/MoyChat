@@ -21,7 +21,7 @@ db.defaults({
 
 // ==================== EMAILJS API ====================
 const EMAILJS_SERVICE_ID = 'service_w8lan2y';
-const EMAILJS_TEMPLATE_ID = 'template_sicore';  // Замените на ваш Template ID
+const EMAILJS_TEMPLATE_ID = 'template_kmxa0ff';  // Замените на ваш Template ID
 const EMAILJS_PUBLIC_KEY = 't8XHLcCRf_5ITFOHp';
 
 async function sendEmailWithEmailJS(email, code) {
@@ -526,3 +526,4 @@ http.listen(PORT, () => {
     console.log(`🚀 Sicore server running on port ${PORT}`);
     console.log(`📧 EmailJS Service: ${EMAILJS_SERVICE_ID}`);
 });
+
