@@ -511,4 +511,28 @@ function getSocketByUserId(userId) {
     return null;
 }
 
-function broadcast
+function broadcastUserStatus(userId, status) {
+    const userChats = db.get('chats')
+        .filter(c => c.participants.includes(userId))
+        .value();
+
+    userChats.forEach(chat => {
+        chat.participants.forEach(participantId => {
+            if (participantId !== userId) {
+                const socketId = getSocketByUserId(participantId);
+                if (socketId) {
+                    io.to(socketId).emit('user-status-changed', {
+                        userId: userId,
+                        status: status,
+                        lastSeen: Date.now()
+                    });
+                }
+            }
+        });
+    });
+}
+
+const PORT = process.env.PORT || 3000;
+http.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+});
